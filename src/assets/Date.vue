@@ -1,16 +1,30 @@
-<script setup></script>
+<script setup>
+import { ref } from 'vue';
+
+let today = new Date();
+
+const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+
+const day = ref(today.getDate());
+const month = ref(monthNames[today.getMonth()]);
+const year = ref(today.getFullYear());
+
+console.log(day)
+console.log(month)
+console.log(year)
+</script>
 
 <template>
     <div class="date">
         <div class="date-numbers">
             <div class="day">
-                12
+                {{ day }}
             </div>
             <div class="year">
-                2025
+                {{ year }}
             </div>
         </div>
-        <div class="month">Dicembre</div>
+        <div class="month">{{ month }}</div>
         <hr />
     </div>
 </template>
@@ -37,7 +51,8 @@
 .day {
     color: #B54A4A;
     font-size: 300px;
-    padding-right: 3%;
+    padding-right: 10px;
+    padding-bottom: 8px;
 }
 
 .month {
