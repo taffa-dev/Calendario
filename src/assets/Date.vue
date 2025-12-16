@@ -34,7 +34,7 @@ const year = ref(today.getFullYear());
     flex-direction: column;
     align-items: center;
     width: fit-content;
-    padding-top: 25vh;
+    padding-top: 20vh;
 }
 
 .date-numbers {
