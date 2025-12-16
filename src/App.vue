@@ -1,50 +1,26 @@
-<script setup></script>
+<script setup>
+import Aphorism from './assets/Aphorism.vue';
+import Date from './assets/Date.vue';
+
+</script>
 
 <template>
-  <div class="date-container">
-    <div class="date">
-      <div class="date-numbers">
-        <div class="day">
-          12
-        </div>
-        <div class="year">
-          2025
-        </div>
-      </div>
-      <div class="month">Dicembre</div>
-    </div>
+  <div class="calendar">
+    <Date></Date>
+    <Aphorism></Aphorism>
   </div>
 </template>
 
 <style scoped>
-.date-container {
-  margin: auto;
-}
-
-.date {
-  font-family: "Abhaya Libre", serif;
-  font-weight: 800;
-  font-style: normal;
+.calendar {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
+</style>
 
-.date-numbers {
-  display: flex;
-  margin-bottom: -100px;
-}
-
-.day {
-  font-size: 300px;
-}
-
-.month {
-  font-size: 78px;
-}
-
-.year {
-  transform: rotate(90deg);
-  font-size: 96px;
-  margin-left: -190px;
-}
+<style>
+  body {
+    background-color: rgb(255, 241, 219);
+  }
 </style>
