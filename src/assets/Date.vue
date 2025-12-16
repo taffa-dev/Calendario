@@ -8,10 +8,6 @@ const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno'
 const day = ref(today.getDate());
 const month = ref(monthNames[today.getMonth()]);
 const year = ref(today.getFullYear());
-
-console.log(day)
-console.log(month)
-console.log(year)
 </script>
 
 <template>
@@ -38,7 +34,7 @@ console.log(year)
     flex-direction: column;
     align-items: center;
     width: fit-content;
-    padding-top: 5%;
+    padding-top: 25vh;
 }
 
 .date-numbers {

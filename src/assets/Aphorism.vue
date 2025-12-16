@@ -1,15 +1,32 @@
-<script setup></script>
+<script setup>
+import { ref } from 'vue';
+import { aphorisms } from './aphorisms';
+
+
+function splitQuote(str) {
+  const start = str.indexOf("«") + 1;
+  const end = str.indexOf("»");
+  const message = str.slice(start, end).trim();
+  const authorStart = str.lastIndexOf(" ") + 1;
+  const author = str.slice(authorStart).trim();
+  return { message, author };
+}
+
+
+const random = Math.floor(Math.random() * aphorisms.length);
+const { message, author } = splitQuote(aphorisms[random])
+
+
+</script>
 
 <template>
   <div class="aphorism-text">
-    Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis
-    natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec,
-    pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-    vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede
-    mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus.
-    Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis,
-    feugiat a,
+    <div>{{ message }}</div>
+    <div class="author">
+      {{ author }}
+    </div>
   </div>
+
 </template>
 
 <style scoped>
@@ -17,7 +34,13 @@
   font-family: "Abhaya Libre", serif;
   font-style: normal;
   text-align: center;
-  padding: 1.5% 10%
-  ;
+  font-size: larger;
+  padding: 1.5% 10%;
+}
+
+.author {
+  font-style: italic;
+  font-weight: bold;
+  padding-top: 2%;
 }
 </style>
