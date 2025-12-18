@@ -1,7 +1,7 @@
 <script setup>
-import { aphorisms } from './aphorisms';
-import { frasi_celebri } from './frasi_celebri';
-import { kanye } from './kanye';
+import { aphorisms } from './quotes/aphorisms';
+import { frasi_celebri } from './quotes/frasi_celebri';
+import { kanye } from './quotes/kanye';
 
 // function splitQuote(str) {
 //   const start = str.indexOf("«") + 1;

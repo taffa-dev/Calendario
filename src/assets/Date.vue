@@ -58,7 +58,7 @@ const year = ref(today.getFullYear());
     justify-content: center;
     line-height: 0.8;
     border-bottom: 1px solid black;
-    padding: 0 25%;
+    padding: 0 15%;
     padding-bottom: 10%;
 }
 
