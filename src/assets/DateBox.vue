@@ -1,13 +1,15 @@
 <script setup>
 import { ref } from 'vue';
 
-let today = new Date();
+const props = defineProps({
+  today: { type: Date }
+});
 
 const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
-const day = ref(today.getDate());
-const month = ref(monthNames[today.getMonth()]);
-const year = ref(today.getFullYear());
+const day = ref(props.today.getDate());
+const month = ref(monthNames[props.today.getMonth()]);
+const year = ref(props.today.getFullYear());
 </script>
 
 <template>

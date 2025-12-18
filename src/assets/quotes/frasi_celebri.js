@@ -5,5 +5,6 @@ export const frasi_celebri = [
     "Facciamo che il giovedì pomeriggio non si lavora.|S.T.",
     "Nessuno ti riporterà indietro questi anni.|J.S.",
     "Non posso più fatturare e se non fatturo non possiamo mangiare.|M.M.",
-    "A questo punto|M.M."
+    "A questo punto|M.M.",
+    "Come disse...|Anonimo"
 ]

@@ -1,12 +1,14 @@
 <script setup>
 import Aphorism from './assets/Aphorism.vue';
-import Date from './assets/Date.vue';
+import DateBox from './assets/DateBox.vue';
+
+const today = new Date;
 </script>
 
 <template>
   <div class="calendar">
-    <Date class="date"></Date>
-    <Aphorism class="aphorism"></Aphorism>
+    <DateBox class="date" :today="today"></DateBox>
+    <Aphorism class="aphorism" :today="today"></Aphorism>
   </div>
 </template>
 
