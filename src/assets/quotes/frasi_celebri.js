@@ -6,5 +6,8 @@ export const frasi_celebri = [
     "Nessuno ti riporterà indietro questi anni.|J.S.",
     "Non posso più fatturare e se non fatturo non possiamo mangiare.|M.M.",
     "A questo punto|M.M.",
-    "Come disse...|Anonimo"
+    "Come disse...|Anonimo",
+    "Appoggia e spingi.|M.M.",
+    "Disinstalla inde e vai a casa.|J.S.",
+    "Spero di accendere il pc domani mattina e trovare un messaggio con 'master ripristinata'.|E.C."
 ]
