@@ -57,6 +57,7 @@ const { message, author } = splitFrasi(frasi_celebri[random])
 
 <style scoped>
 .aphorism-text {
+  color: var(--color-3);
   font-family: "Abhaya Libre", serif;
   font-style: normal;
   text-align: center;

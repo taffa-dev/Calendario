@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import '../theme.css';
 
 const props = defineProps({
   today: { type: Date }
@@ -23,7 +24,7 @@ const year = ref(props.today.getFullYear());
             </div>
         </div>
         <div class="month">{{ month }}</div>
-        <hr />
+        <hr class="separator"/>
     </div>
 </template>
 
@@ -47,14 +48,14 @@ const year = ref(props.today.getFullYear());
 }
 
 .day {
-    color: #B54A4A;
+    color: var(--color-1);
     font-size: 300px;
     padding-right: 10px;
     padding-bottom: 8px;
 }
 
 .month {
-    color: #5B0000;
+    color: var(--color-2);
     font-size: 78px;
     display: flex;
     justify-content: center;
@@ -65,8 +66,12 @@ const year = ref(props.today.getFullYear());
 }
 
 .year {
-    color: #280000;
+    color: var(--color-3);
     writing-mode: vertical-lr;
     font-size: 96px;
+}
+
+.separator{
+    color: var(--color-3)
 }
 </style>
