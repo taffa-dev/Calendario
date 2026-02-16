@@ -1,19 +1,52 @@
 <script setup>
-import Aphorism from './assets/Aphorism.vue';
-import DateBox from './assets/DateBox.vue';
+import { ref, onMounted, watch } from 'vue'
+import Aphorism from './assets/Aphorism.vue'
+import DateBox from './assets/DateBox.vue'
 
-const today = new Date;
+const today = new Date()
+
+const THEME_KEY = 'color-theme'
+const theme = ref('light')
+
+function applyThemeToDocument(t) {
+  const root = document.documentElement
+  if (t === 'dark') {
+    root.setAttribute('color-theme', 'dark')
+  } else {
+    root.removeAttribute('color-theme')
+  }
+}
+
+// Inizializza: leggi localStorage o prefers-color-scheme
+onMounted(() => {
+  let saved = localStorage.getItem(THEME_KEY)
+  if (saved === 'dark' || saved === 'light') {
+    theme.value = saved
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    theme.value = 'dark'
+  }
+  applyThemeToDocument(theme.value)
+})
+
+watch(theme, (t) => {
+  localStorage.setItem(THEME_KEY, t)
+  applyThemeToDocument(t)
+})
+
+function toggleTheme() {
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+}
+
 </script>
 
 <template>
-
   <button class="theme-toggle" @click="toggleTheme"
     :aria-label="`Cambia tema: ${theme === 'light' ? 'scuro' : 'chiaro'}`" type="button">
     {{ theme === 'light' ? 'Tema scuro 🌙' : 'Tema chiaro ☀️' }}
   </button>
   <div class="calendar">
-    <DateBox class="date" :today="today"></DateBox>
-    <Aphorism class="aphorism" :today="today"></Aphorism>
+    <DateBox class="date" :today="today" />
+    <Aphorism class="aphorism" :today="today" />
   </div>
 </template>
 
@@ -46,6 +79,6 @@ const today = new Date;
 
 <style>
 body {
-  background-color: rgb(255, 248, 236);
+  background-color: var(--color-bg);
 }
 </style>
