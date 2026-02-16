@@ -24,7 +24,6 @@ const year = ref(props.today.getFullYear());
             </div>
         </div>
         <div class="month">{{ month }}</div>
-        <hr class="separator"/>
     </div>
 </template>
 
@@ -60,7 +59,7 @@ const year = ref(props.today.getFullYear());
     display: flex;
     justify-content: center;
     line-height: 0.8;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--color-3);
     padding: 0 15%;
     padding-bottom: 10%;
 }
@@ -69,9 +68,5 @@ const year = ref(props.today.getFullYear());
     color: var(--color-3);
     writing-mode: vertical-lr;
     font-size: 96px;
-}
-
-.separator{
-    color: var(--color-3)
 }
 </style>
