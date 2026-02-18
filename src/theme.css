@@ -6,8 +6,8 @@
 }
 
 :root[color-theme = "dark"] {
-    --color-bg: #060030;
-    --color-1: #ff7300;
-    --color-2: #b20e0e;
-    --color-3: #ffd4c2;
+    --color-bg: #230505;
+    --color-1: #d17a32;
+    --color-2: #b33a3a;
+    --color-3: #c37f63;
 }

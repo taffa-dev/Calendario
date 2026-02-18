@@ -40,9 +40,8 @@ function toggleTheme() {
 </script>
 
 <template>
-  <button class="theme-toggle" @click="toggleTheme"
-    :aria-label="`Cambia tema: ${theme === 'light' ? 'scuro' : 'chiaro'}`" type="button">
-    {{ theme === 'light' ? 'Tema scuro 🌙' : 'Tema chiaro ☀️' }}
+  <button class="theme-toggle" @click="toggleTheme" type="button">
+    <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
   </button>
   <div class="calendar">
     <DateBox class="date" :today="today" />
@@ -74,6 +73,10 @@ function toggleTheme() {
 
 .theme-toggle:active {
   transform: translateY(0);
+}
+
+.icon-theme{
+  color: var(--color-3)
 }
 </style>
 
