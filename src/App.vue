@@ -75,7 +75,7 @@ function toggleTheme() {
   transform: translateY(0);
 }
 
-.icon-theme{
+.icon-theme {
   color: var(--color-3)
 }
 </style>
