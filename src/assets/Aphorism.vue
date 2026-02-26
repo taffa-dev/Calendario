@@ -42,7 +42,16 @@ function splitFrasi(str) {
 }
 
 const random = getDailyRandomNumber(props.today) % frasi_celebri.length;
-const { message, author } = splitFrasi(frasi_celebri[random])
+let frase = "";
+
+if (props.today.getDay() === 4 && random % 2 === 0) {
+  frase = "Facciamo che il giovedì pomeriggio non si lavora.|S.T.";
+}
+else {
+  frase = frasi_celebri[random];
+}
+
+const { message, author } = splitFrasi(frase)
 </script>
 
 <template>

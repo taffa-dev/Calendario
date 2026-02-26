@@ -17,7 +17,6 @@ function applyThemeToDocument(t) {
   }
 }
 
-// Inizializza: leggi localStorage o prefers-color-scheme
 onMounted(() => {
   let saved = localStorage.getItem(THEME_KEY)
   if (saved === 'dark' || saved === 'light') {
