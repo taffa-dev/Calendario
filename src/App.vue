@@ -81,6 +81,10 @@ function toggleTheme() {
 
 <style>
 body {
+  /* background: radial-gradient(ellipse at top, var(--color-bg) 0%, var(--color-bg-2) 100%); */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   background-color: var(--color-bg);
+  transition: background-color 2s ease-out;
 }
 </style>
