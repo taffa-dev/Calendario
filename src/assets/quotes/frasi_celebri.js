@@ -15,5 +15,6 @@ export const frasi_celebri = [
     "Stacco prima per andare a prendere i bambini a scuola, recupero stasera.|Anonimo",
     "Ah, c'è un problema.|Anonimo",
     "@Generale sto male|Anonimo",
-    "Richiesta Permesso Approvata|AT"
+    "Richiesta Permesso Approvata|AT",
+    "Il trucco è non dire niente finché non si prova|E.C."
 ]
