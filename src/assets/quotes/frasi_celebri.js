@@ -16,5 +16,6 @@ export const frasi_celebri = [
     "Ah, c'è un problema.|Anonimo",
     "@Generale sto male|Anonimo",
     "Richiesta Permesso Approvata|AT",
-    "Il trucco è non dire niente finché non si prova|E.C."
+    "Il trucco è non dire niente finché non si prova|E.C.",
+    "Buongiorno, non ho trascorso una bellissima pasqua|👻"
 ]
