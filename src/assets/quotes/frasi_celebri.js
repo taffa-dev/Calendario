@@ -17,5 +17,9 @@ export const frasi_celebri = [
     "@Generale sto male|Anonimo",
     "Richiesta Permesso Approvata|AT",
     "Il trucco è non dire niente finché non si prova|E.C.",
-    "Buongiorno, non ho trascorso una bellissima pasqua|👻"
+    "Buongiorno, non ho trascorso una bellissima pasqua|👻",
+    "Lasciami flirtare|J.S.",
+    "☕?|Anonimo",
+    "@Sviluppo c'è un problema nella master|Anonimo",
+    "Giornata in Memoria della Pallina da Golf|Resterai per sempre nei nostri cuori..."
 ]
