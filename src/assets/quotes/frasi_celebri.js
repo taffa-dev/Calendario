@@ -20,5 +20,6 @@ export const frasi_celebri = [
     "Lasciami flirtare|J.S.",
     "☕?|Anonimo",
     "@Sviluppo c'è un problema nella master|Anonimo",
-    "Giornata in Memoria della Pallina da Golf|Resterai per sempre nei nostri cuori..."
+    "Giornata in Memoria della Pallina da Golf|Resterai per sempre nei nostri cuori...",
+    "Voglio solo belle notizie|E.C."
 ]
