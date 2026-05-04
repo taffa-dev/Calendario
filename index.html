@@ -10,8 +10,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
   <title>Calendario</title>
-  <script type="module" crossorigin src="/Calendario/assets/index-pZO_g0K8.js"></script>
-  <link rel="stylesheet" crossorigin href="/Calendario/assets/index-DeTxzCwJ.css">
+  <script>
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.documentElement.setAttribute('color-theme', 'dark');
+    }
+  </script>
+  <script type="module" crossorigin src="/Calendario/assets/index-CjG9nbH_.js"></script>
+  <link rel="stylesheet" crossorigin href="/Calendario/assets/index-4Rft3E2L.css">
 </head>
 
 <body>
