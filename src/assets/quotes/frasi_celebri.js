@@ -21,5 +21,9 @@ export const frasi_celebri = [
     "☕?|Anonimo",
     "@Sviluppo c'è un problema nella master|Anonimo",
     "Giornata in Memoria della Pallina da Golf|Resterai per sempre nei nostri cuori...",
-    "Voglio solo belle notizie|E.C."
+    "Voglio solo belle notizie|E.C.",
+    "Se le cazzate non sono scritte, a un cliente va benissimo dirgli tutto|Anonimo",
+    "Non esistono esperti in questo settore di merda|J.S.",
+    "Pausa arabica?|Anonimo",
+    "Come è possibile tutto questo?|A.M."
 ]
