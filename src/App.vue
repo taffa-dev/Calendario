@@ -25,6 +25,7 @@ onMounted(() => {
     theme.value = 'dark'
   }
   applyThemeToDocument(theme.value)
+  document.documentElement.classList.remove('no-transition');
 })
 
 watch(theme, (t) => {

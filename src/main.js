@@ -8,6 +8,8 @@ import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 library.add(faSun);
 library.add(faMoon);
 
+document.documentElement.classList.add('no-transition');
+
 const app = createApp(App);
 
 app.component("font-awesome-icon", FontAwesomeIcon);

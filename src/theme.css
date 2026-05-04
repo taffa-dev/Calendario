@@ -17,3 +17,7 @@
 div[loaded=true]{
     transition: color 2s ease-out, border-bottom 2s ease-out;
 }
+
+.no-transition * {
+  transition: none !important;
+}
