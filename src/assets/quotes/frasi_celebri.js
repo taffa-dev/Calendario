@@ -25,5 +25,7 @@ export const frasi_celebri = [
     "Se le cazzate non sono scritte, a un cliente va benissimo dirgli tutto|Anonimo",
     "Non esistono esperti in questo settore di merda|J.S.",
     "Pausa arabica?|Anonimo",
-    "Come è possibile tutto questo?|A.M."
+    "Come è possibile tutto questo?|A.M.",
+    "Neppure io mi sono segnata, ma direi che non servo|Anonimo",
+    "Per caso si può partecipare anche in smart?|👻"
 ]
