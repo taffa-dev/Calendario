@@ -28,5 +28,6 @@ export const frasi_celebri = [
     "Come è possibile tutto questo?|A.M.",
     "Neppure io mi sono segnata, ma direi che non servo.|Anonimo",
     "Per caso si può partecipare anche in smart?|👻",
-    "Fatelo come se doveste vendere a un talebano che se sbaglia qualcosa vi spara in testa.|Anonimo"
+    "Fatelo come se doveste vendere a un talebano che se sbaglia qualcosa vi spara in testa.|Anonimo",
+"Il mio mantra é che devono esplodere tutti.|E.C."
 ]
