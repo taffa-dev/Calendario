@@ -29,5 +29,11 @@ export const frasi_celebri = [
     "Neppure io mi sono segnata, ma direi che non servo.|Anonimo",
     "Per caso si può partecipare anche in smart?|👻",
     "Fatelo come se doveste vendere a un talebano che se sbaglia qualcosa vi spara in testa.|Anonimo",
-"Il mio mantra é che devono esplodere tutti.|E.C."
+    "Il mio mantra é che devono esplodere tutti.|E.C.",
+    "Coca, scusa, Foca.|M.G.",
+    "La Wii ha distrutto la Nintendo.|A.S.",
+    "Tanto a noi lo stipendio a fine mese arriva lo stesso.|A.D.G.",
+    "Il sistema deve essere in grado di identificare i salari critici prima che i dipendenti se ne vadano.|L.Z.",
+    "Probabilmente quelli di Pro G***a sono leggermente handicappati.|M.G.",
+    "Raga che schifo lavorare.|A.T."
 ]
