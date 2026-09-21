@@ -71,6 +71,18 @@ function toggleTheme() {
   align-items: center;
 }
 
+/* Su smartphone il blocco viene centrato verticalmente invece di essere
+   spinto in basso da un padding fisso in vh. */
+@media (max-width: 700px) {
+  .calendar {
+    box-sizing: border-box;
+    min-height: 100vh;
+    min-height: 100dvh;
+    justify-content: center;
+    padding: 3.5rem 0;
+  }
+}
+
 .theme-toggle {
   position: fixed;
   top: 0.5rem;

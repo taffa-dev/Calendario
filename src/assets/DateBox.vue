@@ -36,6 +36,7 @@ const year = ref(props.today.getFullYear());
     flex-direction: column;
     align-items: center;
     width: fit-content;
+    max-width: 100%;
     padding-top: 20vh;
 }
 
@@ -48,25 +49,32 @@ const year = ref(props.today.getFullYear());
 
 .day {
     color: var(--color-1);
-    font-size: 300px;
-    padding-right: 10px;
-    padding-bottom: 8px;
+    font-size: clamp(110px, 42vw, 300px);
+    padding-right: 0.034em;
+    padding-bottom: 0.027em;
 }
 
 .month {
     color: var(--color-2);
-    font-size: 78px;
+    font-size: clamp(29px, 10.9vw, 78px);
     display: flex;
     justify-content: center;
+    white-space: nowrap;
     line-height: 0.8;
     border-bottom: 1px solid var(--color-3);
-    padding: 0 15%;
-    padding-bottom: 10%;
+    padding: 0 0.71em;
+    padding-bottom: 0.58em;
 }
 
 .year {
     color: var(--color-3);
     writing-mode: vertical-lr;
-    font-size: 96px;
+    font-size: clamp(35px, 13.4vw, 96px);
+}
+
+@media (max-width: 700px) {
+    .date {
+        padding-top: 0;
+    }
 }
 </style>

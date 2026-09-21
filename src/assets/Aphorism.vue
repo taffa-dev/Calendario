@@ -51,7 +51,8 @@ const { message, author } = splitFrasi(frase)
   font-family: "Abhaya Libre", serif;
   font-style: normal;
   text-align: center;
-  font-size: larger;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  line-height: 1.35;
   padding: 1.5% 10%;
 }
 
