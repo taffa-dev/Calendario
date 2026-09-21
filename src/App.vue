@@ -23,7 +23,13 @@ function initialTheme() {
   if (saved === 'dark' || saved === 'light') {
     return saved
   }
-  return document.documentElement.getAttribute('color-theme') === 'dark' ? 'dark' : 'light'
+  if (document.documentElement.getAttribute('color-theme') === 'dark') {
+    return 'dark'
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark'
+  }
+  return 'light'
 }
 
 const theme = ref(initialTheme())
@@ -45,15 +51,13 @@ function toggleTheme() {
 </script>
 
 <template>
-  <div class="top-bar">
-    <button class="theme-toggle" @click="toggleTheme" type="button"
-      :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
-      <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
-    </button>
-    <a class="theme-toggle" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
-      <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
-    </a>
-  </div>
+  <button class="theme-toggle theme-toggle--left" @click="toggleTheme" type="button"
+    :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
+    <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
+  </button>
+  <a class="theme-toggle theme-toggle--right" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
+    <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
+  </a>
   <div class="calendar">
     <DateBox class="date" :today="today" />
     <Aphorism class="aphorism" :today="today" />
@@ -67,13 +71,10 @@ function toggleTheme() {
   align-items: center;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem;
-}
-
 .theme-toggle {
+  position: fixed;
+  top: 1rem;
+  z-index: 10;
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--border);
@@ -84,6 +85,14 @@ function toggleTheme() {
   cursor: pointer;
   text-decoration: none;
   transition: transform 0.08s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-toggle--left {
+  left: 1rem;
+}
+
+.theme-toggle--right {
+  right: 1rem;
 }
 
 .theme-toggle:hover {
@@ -101,6 +110,7 @@ function toggleTheme() {
 
 <style>
 body {
+  margin: 0;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-color: var(--color-bg);
