@@ -36,8 +36,6 @@ export const frasi_celebri = [
     "Il sistema deve essere in grado di identificare i salari critici prima che i dipendenti se ne vadano.|L.Z.",
     "Probabilmente quelli di Pro G***a sono leggermente handicappati.|M.G.",
     "Raga che schifo lavorare.|A.T.",
-    "Facciamo il file per non accavallare le ferie.|Anonimo",
-    "Parlerò con i meritevoli a fine Maggio.|A.R.",
     "COCA.|M.G.",
     "Li altri li do a padre Pio.|M.G.",
     "Il numero più chiamato sul mio cellulare personale è quello del mio capo, che tristezza.|Anonimo",
