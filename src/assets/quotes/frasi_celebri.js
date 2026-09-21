@@ -35,5 +35,12 @@ export const frasi_celebri = [
     "Tanto a noi lo stipendio a fine mese arriva lo stesso.|A.D.G.",
     "Il sistema deve essere in grado di identificare i salari critici prima che i dipendenti se ne vadano.|L.Z.",
     "Probabilmente quelli di Pro G***a sono leggermente handicappati.|M.G.",
-    "Raga che schifo lavorare.|A.T."
+    "Raga che schifo lavorare.|A.T.",
+    "Facciamo il file per non accavallare le ferie.|Anonimo",
+    "Parlerò con i meritevoli a fine Maggio.|A.R.",
+    "COCA.|M.G.",
+    "Li altri li do a padre Pio.|M.G.",
+    "Il numero più chiamato sul mio cellulare personale è quello del mio capo, che tristezza.|Anonimo",
+    "Sto vedendo una cosa chiaramente paranormale.|A.T.",
+    "Tutto arrosto.|M.G."
 ]
