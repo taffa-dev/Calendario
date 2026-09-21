@@ -6,7 +6,6 @@ import DateBox from './assets/DateBox.vue'
 const today = new Date()
 
 const THEME_KEY = 'color-theme'
-const theme = ref('light')
 
 function applyThemeToDocument(t) {
   const root = document.documentElement
@@ -17,13 +16,17 @@ function applyThemeToDocument(t) {
   }
 }
 
-onMounted(() => {
-  let saved = localStorage.getItem(THEME_KEY)
+function initialTheme() {
+  const saved = localStorage.getItem(THEME_KEY)
   if (saved === 'dark' || saved === 'light') {
-    theme.value = saved
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    theme.value = 'dark'
+    return saved
   }
+  return document.documentElement.getAttribute('color-theme') === 'dark' ? 'dark' : 'light'
+}
+
+const theme = ref(initialTheme())
+
+onMounted(() => {
   applyThemeToDocument(theme.value)
   document.documentElement.classList.remove('no-transition');
 })
@@ -40,7 +43,8 @@ function toggleTheme() {
 </script>
 
 <template>
-  <button class="theme-toggle" @click="toggleTheme" type="button">
+  <button class="theme-toggle" @click="toggleTheme" type="button"
+    :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
     <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
   </button>
   <div class="calendar">
