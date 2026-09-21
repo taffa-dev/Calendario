@@ -46,13 +46,13 @@ function toggleTheme() {
 
 <template>
   <div class="top-bar">
-    <a class="theme-toggle" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
-      <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
-    </a>
     <button class="theme-toggle" @click="toggleTheme" type="button"
       :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
       <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
     </button>
+    <a class="theme-toggle" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
+      <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
+    </a>
   </div>
   <div class="calendar">
     <DateBox class="date" :today="today" />
@@ -69,9 +69,8 @@ function toggleTheme() {
 
 .top-bar {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  padding: 1rem 1rem 0;
+  justify-content: space-between;
+  padding: 1rem;
 }
 
 .theme-toggle {
