@@ -73,34 +73,29 @@ function toggleTheme() {
 
 .theme-toggle {
   position: fixed;
-  top: 1rem;
+  top: 0.5rem;
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--fg);
-  padding: 0.5rem 0.8rem;
-  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-3);
+  padding: 0.35rem;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.08s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .theme-toggle--left {
-  left: 1rem;
+  left: 0.5rem;
 }
 
 .theme-toggle--right {
-  right: 1rem;
+  right: 0.5rem;
 }
 
 .theme-toggle:hover {
-  transform: translateY(-1px);
-}
-
-.theme-toggle:active {
-  transform: translateY(0);
+  opacity: 0.7;
 }
 
 .icon-theme {
