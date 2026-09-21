@@ -28,10 +28,15 @@ const year = ref(props.today.getFullYear());
 </template>
 
 <style scoped>
+/* Tutto il blocco data e' dimensionato a partire da un'unica misura base:
+   i figli usano em, quindi le proporzioni fra giorno, mese e anno restano
+   identiche a quelle del desktop a qualsiasi larghezza di schermo.
+   Base 50px => giorno 300px, mese 78px, anno 96px (valori desktop). */
 .date {
     font-family: "Abhaya Libre", serif;
     font-weight: 800;
     font-style: normal;
+    font-size: clamp(18px, 7vw, 50px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -49,14 +54,14 @@ const year = ref(props.today.getFullYear());
 
 .day {
     color: var(--color-1);
-    font-size: clamp(110px, 42vw, 300px);
-    padding-right: 0.034em;
-    padding-bottom: 0.027em;
+    font-size: 6em;
+    padding-right: 0.03333em;
+    padding-bottom: 0.02667em;
 }
 
 .month {
     color: var(--color-2);
-    font-size: clamp(29px, 10.9vw, 78px);
+    font-size: 1.56em;
     display: flex;
     justify-content: center;
     white-space: nowrap;
@@ -69,7 +74,7 @@ const year = ref(props.today.getFullYear());
 .year {
     color: var(--color-3);
     writing-mode: vertical-lr;
-    font-size: clamp(35px, 13.4vw, 96px);
+    font-size: 1.92em;
 }
 
 @media (max-width: 700px) {
