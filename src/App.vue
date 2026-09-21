@@ -55,7 +55,7 @@ function toggleTheme() {
     :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
     <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
   </button>
-  <a class="theme-toggle theme-toggle--right" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
+  <a class="theme-toggle theme-toggle--right" :href="PILLS_URL" aria-label="Vai a Pills">
     <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
   </a>
   <div class="calendar">
