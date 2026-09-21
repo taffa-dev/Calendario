@@ -3,6 +3,8 @@ import { ref, onMounted, watch } from 'vue'
 import Aphorism from './assets/Aphorism.vue'
 import DateBox from './assets/DateBox.vue'
 
+const PILLS_URL = 'https://taffa-dev.github.io/Pills/'
+
 const today = new Date()
 
 const THEME_KEY = 'color-theme'
@@ -43,10 +45,15 @@ function toggleTheme() {
 </script>
 
 <template>
-  <button class="theme-toggle" @click="toggleTheme" type="button"
-    :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
-    <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
-  </button>
+  <div class="top-bar">
+    <a class="theme-toggle" :href="PILLS_URL" target="_blank" rel="noopener" aria-label="Vai a Pills">
+      <font-awesome-icon icon="fa-solid fa-pills" class="icon-theme" />
+    </a>
+    <button class="theme-toggle" @click="toggleTheme" type="button"
+      :aria-label="theme === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
+      <font-awesome-icon :icon="theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'" class="icon-theme" />
+    </button>
+  </div>
   <div class="calendar">
     <DateBox class="date" :today="today" />
     <Aphorism class="aphorism" :today="today" />
@@ -60,14 +67,23 @@ function toggleTheme() {
   align-items: center;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem 1rem 0;
+}
+
 .theme-toggle {
-  justify-self: end;
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--fg);
   padding: 0.5rem 0.8rem;
   border-radius: 10px;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.08s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
