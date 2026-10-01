@@ -16,7 +16,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `src/oggi.js` — data di oggi (`?data=` in sviluppo) e cambio giorno a mezzanotte / al ritorno sulla scheda.
 - `src/tema.js` + script in `index.html` — tema chiaro/scuro; `src/tema.css` colori e `--cambio-tema` (2s); `src/font.css` + `src/assets/fonts/` Abhaya Libre in casa (stessi file di Google Fonts: latin e latin-ext, pesi 400/700/800).
 - `src/components/` — `DataDelGiorno`, `Frase`, `Icona` (tracciati di Font Awesome Free copiati, CC BY 4.0, stesse misure del pacchetto: 1em × 1.25em).
-- `public/` — `manifest.webmanifest`, `sw.js`, icone dell'app installabile.
+- `public/` — favicon, `icona-192.png` (icona dei segnalibri) e `sw.js`, che serve solo a disinstallare (sotto).
 - `suggerimenti/` — server delle proposte, gira sul Raspberry Pi (vedi `suggerimenti/LEGGIMI.md`).
 
 ## Scelta della frase
@@ -27,10 +27,9 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `npm test` verifica: primo giorno = vecchio sistema, sito e generatore danno le stesse frasi, nessuna ripetizione nel giro e distanza minima, frasi aggiunte senza toccare passato e oggi, speciali (giovedì circa metà, date sempre).
 
 ## Pagina
-- Frecce ai lati, frecce della tastiera e scorrimento col dito: i giorni passati **della settimana in corso** (da lunedì a oggi, mai il futuro). Icone: tema e Pills in alto, condividi e proponi una frase (`frase-celebre.taffa-dev.site/?tema=dark|light`: il form prende il tema del Calendario e lo ricorda in un cookie) in basso.
+- Frecce ai lati, frecce della tastiera e scorrimento col dito: i giorni passati **della settimana in corso** (da lunedì a oggi, mai il futuro). Tema in alto a sinistra; in alto a destra un'icona a **quattro quadratini** (disegnata in `Icona.vue`) che apre a ventaglio (quarto di cerchio verso il foglio, dal basso verso l'alto: Pills, condividi, proponi; aperto, l'icona ruota di 45°) condividi, proponi una frase (`frase-celebre.taffa-dev.site/?tema=dark|light`: il form prende il tema del Calendario e lo ricorda in un cookie) e Pills. Si chiude toccando altrove, con Esc o dopo aver condiviso. L'utente ha scartato le icone nei quattro angoli ("sembra una pulsantiera"), il colophon in basso e la guida della prima visita.
 - Il foglio è centrato in verticale. La pagina lasciata aperta passa al giorno nuovo a mezzanotte.
-- Prima visita (`Guida.vue`): cinque fumetti, uno per pulsante (tema, Pills, freccia dei giorni passati, condividi, proponi); non bloccano nulla, spariscono al primo tocco/tasto o dopo 8 secondi e non ricompaiono (`localStorage` `calendario-guida-vista`). Per rivederli: cancellare quella chiave.
-- **Impaginazione di numero, anno e mese** (`foglio.js`): le cifre di Abhaya Libre hanno ingombri diversi (3, 4, 5, 7, 9 scendono sotto la riga; 2 e 8 lasciano molto vuoto a destra). Il numero è centrato sull'inchiostro dell'anno, sta a 14px dall'anno e il mese 7px sotto la parte più bassa dei due (misure a grandezza piena). `impaginazione()` usa misure della pagina senza correzioni (`BASE_GIORNO`, `ANNO_SU/GIU`, `BASE_MESE`...): se cambia il CSS dei numeri in `DataDelGiorno` vanno rimisurate (elemento vuoto sulla riga di base del giorno e del mese, pixel dell'anno). L'immagine da condividere fa lo stesso calcolo con `measureText`.
+- **Impaginazione di numero, anno e mese** (`foglio.js`): le cifre di Abhaya Libre hanno ingombri diversi (3, 4, 5, 7, 9 scendono sotto la riga; 2 e 8 lasciano molto vuoto a destra). Il numero è centrato sull'inchiostro dell'anno, sta a 14px dall'anno e il mese 7px sotto la parte più bassa dei due (misure a grandezza piena). `impaginazione()` usa misure della pagina senza correzioni (`BASE_GIORNO`, `ANNO_SU/GIU`, `BASE_MESE`...): se cambia il CSS dei numeri in `DataDelGiorno` vanno rimisurate (elemento vuoto sulla riga di base del giorno e del mese, pixel dell'anno). L'immagine da condividere fa lo stesso calcolo con `measureText`. Dopo un 1 finale (e un po' dopo un 7) c'è aria in più (`ariaDopo`): il piede dell'1 arriva sotto l'anno e a distanza misurata uguale sembrava attaccato.
 - `DataDelGiorno` misura tutto in `--u` (1px su schermi larghi, meno sui telefoni, lasciando spazio alle frecce): nuove misure lì dentro come `calc(N * var(--u))`.
 
 ## Tema
@@ -40,8 +39,9 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `theme-color` (barre del telefono) segue il tema, anche quando lo si cambia col pulsante.
 
 ## Vincoli tecnici
-- Icone ai bordi gemelle di Pills: `top: calc(0.5rem + env(safe-area-inset-top))` (e così gli altri lati), `padding: 0.35rem`, `font-size: 1rem`, icone `1em`. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
-- App installabile: `viewport-fit=cover`, quindi l'app disegna anche sotto le barre di Android: sfondo su `html` e `body`, `env(safe-area-inset-*)` per tutto ciò che è fisso ai bordi. Service worker solo nella build: pagina dalla rete (copia salvata se manca), `assets/` dalla copia salvata.
+- Icone in alto gemelle di Pills: `top: calc(0.5rem + env(safe-area-inset-top))` (e così il lato), `padding: 0.35rem`, `font-size: 1rem`, icone `1em`; l'icona a quadratini del Calendario sta dove in Pills c'è il link al Calendario. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
+- **Niente app installabile** (scelta dell'utente: aprire Pills dal Calendario o viceversa apriva il browser interno dell'app). Niente manifest; `public/sw.js` resta solo per chi l'aveva installata: cancella le copie salvate e si disattiva; `main.js` disattiva i service worker rimasti. Non rimettere un service worker che salva copie.
+- `viewport-fit=cover`: sfondo su `html` e `body`, `env(safe-area-inset-*)` per tutto ciò che è fisso ai bordi.
 - Effetti hover solo dentro `@media (hover: hover) and (pointer: fine)`: sui touch screen `:hover` resta attivo dopo il tocco.
 - Nessuna risorsa esterna (font e icone sono in casa).
 

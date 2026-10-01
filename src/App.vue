@@ -12,7 +12,6 @@ import ricorrenzePersonali from './ricorrenze.json';
 import DataDelGiorno from './components/DataDelGiorno.vue';
 import Frase from './components/Frase.vue';
 import Icona from './components/Icona.vue';
-import Guida from './components/Guida.vue';
 
 const PILLS_URL = 'https://taffa-dev.github.io/Pills/';
 // Il form prende il tema del Calendario dal link (e se lo ricorda)
@@ -31,6 +30,13 @@ const giornoVisto = computed(() => {
 const frase = computed(() => getFrase(frasi, programma, giornoVisto.value));
 const ricorrenze = computed(() => getRicorrenze(ricorrenzePersonali, giornoVisto.value));
 
+// Ventaglio delle azioni in alto a destra: si chiude toccando altrove o con Esc
+const aperto = ref(false);
+const gruppo = ref(null);
+function toccoFuori(evento) {
+  if (aperto.value && !gruppo.value?.contains(evento.target)) aperto.value = false;
+}
+
 function vai(passi) {
   indietro.value = Math.min(giorniDaLunedi.value, Math.max(0, indietro.value - passi));
 }
@@ -41,6 +47,7 @@ function condividiGiorno() {
 
 // Frecce della tastiera e scorrimento col dito
 function tasto(evento) {
+  if (evento.key === 'Escape') aperto.value = false;
   if (evento.key === 'ArrowLeft') vai(-1);
   if (evento.key === 'ArrowRight') vai(1);
 }
@@ -60,6 +67,7 @@ function toccoFinito(evento) {
 let fermaControllo;
 onMounted(() => {
   window.addEventListener('keydown', tasto);
+  window.addEventListener('pointerdown', toccoFuori);
   fermaControllo = controllaCambioGiorno(oggi, () => {
     oggi.value = getOggi();
     indietro.value = 0;
@@ -67,19 +75,12 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', tasto);
+  window.removeEventListener('pointerdown', toccoFuori);
   fermaControllo?.();
 });
 </script>
 
 <template>
-  <button class="icona in-alto a-sinistra" type="button" @click="cambiaTema"
-    :aria-label="tema === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
-    <Icona :nome="tema === 'light' ? 'luna' : 'sole'" />
-  </button>
-  <a class="icona in-alto a-destra" :href="PILLS_URL" aria-label="Vai a Pills">
-    <Icona nome="pillole" />
-  </a>
-
   <button v-show="indietro < giorniDaLunedi" class="icona freccia a-sinistra" type="button" @click="vai(-1)"
     aria-label="Giorno prima">
     <Icona nome="indietro" />
@@ -89,14 +90,33 @@ onBeforeUnmount(() => {
     <Icona nome="avanti" />
   </button>
 
-  <button class="icona in-basso a-sinistra" type="button" @click="condividiGiorno" aria-label="Condividi">
-    <Icona nome="condividi" />
+  <button class="icona tema" type="button" @click="cambiaTema"
+    :aria-label="tema === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
+    <Icona :nome="tema === 'light' ? 'luna' : 'sole'" />
   </button>
-  <a class="icona in-basso a-destra" :href="`${SUGGERIMENTI_URL}?tema=${tema}`" aria-label="Proponi una frase">
-    <Icona nome="proponi" />
-  </a>
 
-  <Guida :lunedi="giorniDaLunedi === 0" />
+  <!-- Le altre azioni stanno raccolte in alto a destra: i quattro quadratini le aprono a ventaglio attorno a sé -->
+  <div ref="gruppo" :class="['gruppo', { aperto }]">
+    <button class="icona apri" type="button" @click="aperto = !aperto" :aria-expanded="aperto"
+      aria-controls="azioni" :aria-label="aperto ? 'Chiudi le azioni' : 'Altre azioni'">
+      <Icona nome="gruppo" />
+    </button>
+    <!-- Dal basso verso l'alto: Pills, condividi, proponi -->
+    <nav id="azioni" class="voci" aria-label="Azioni">
+      <a class="icona voce" style="--x: -2.7rem; --y: 0rem; --i: 0" :tabindex="aperto ? 0 : -1"
+        :href="`${SUGGERIMENTI_URL}?tema=${tema}`" aria-label="Proponi una frase">
+        <Icona nome="proponi" />
+      </a>
+      <button class="icona voce" style="--x: -1.95rem; --y: 1.95rem; --i: 1" type="button" :tabindex="aperto ? 0 : -1"
+        @click="condividiGiorno(); aperto = false" aria-label="Condividi">
+        <Icona nome="condividi" />
+      </button>
+      <a class="icona voce" style="--x: 0rem; --y: 2.7rem; --i: 2" :tabindex="aperto ? 0 : -1" :href="PILLS_URL"
+        aria-label="Vai a Pills">
+        <Icona nome="pillole" />
+      </a>
+    </nav>
+  </div>
 
   <main class="calendario" @touchstart.passive="toccoIniziato" @touchend="toccoFinito">
     <Transition name="sfuma" mode="out-in">
@@ -113,7 +133,7 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   min-height: 100vh;
   min-height: 100dvh;
-  /* Spazio per le icone in alto e in basso (e per le barre di sistema) */
+  /* Spazio per le icone in alto (e per le barre di sistema), uguale in basso per restare centrato */
   padding: calc(3rem + env(safe-area-inset-top)) 0 calc(3rem + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -136,9 +156,8 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 
-/* Posizione e misure gemelle di quelle di Pills: se cambiano qui, vanno cambiate anche là */
+/* Misure gemelle di quelle di Pills: se cambiano qui, vanno cambiate anche là */
 .icona {
-  position: fixed;
   z-index: 10;
   display: inline-flex;
   align-items: center;
@@ -154,15 +173,49 @@ onBeforeUnmount(() => {
 }
 
 /* env(safe-area-inset-*): nell'app installata le icone restano fuori dalle barre di sistema */
-.in-alto {
+.tema {
+  position: fixed;
   top: calc(0.5rem + env(safe-area-inset-top));
+  left: calc(0.5rem + env(safe-area-inset-left));
 }
 
-.in-basso {
-  bottom: calc(0.5rem + env(safe-area-inset-bottom));
+.gruppo {
+  position: fixed;
+  z-index: 10;
+  top: calc(0.5rem + env(safe-area-inset-top));
+  right: calc(0.5rem + env(safe-area-inset-right));
+}
+
+/* Aperto il ventaglio, i quattro quadratini ruotano e diventano un rombo */
+.apri :deep(svg) {
+  transition: transform 0.3s ease;
+}
+
+.aperto .apri :deep(svg) {
+  transform: rotate(45deg);
+}
+
+/* Le voci partono da sotto il + e si aprono a quarto di cerchio verso il foglio, una dopo l'altra */
+.voce {
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0) scale(0.6);
+  transition: transform 0.28s ease, opacity 0.2s ease, visibility 0s linear 0.28s, color var(--cambio-tema);
+  transition-delay: calc((2 - var(--i)) * 40ms), calc((2 - var(--i)) * 40ms), 0.28s, 0s;
+}
+
+.aperto .voce {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(var(--x), var(--y)) scale(1);
+  transition-delay: calc(var(--i) * 50ms), calc(var(--i) * 50ms), 0s, 0s;
 }
 
 .freccia {
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -187,7 +240,10 @@ onBeforeUnmount(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .sfuma-enter-active,
-  .sfuma-leave-active {
+  .sfuma-leave-active,
+  .voce,
+  .aperto .voce,
+  .apri :deep(svg) {
     transition: none;
   }
 }

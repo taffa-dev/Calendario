@@ -1,4 +1,4 @@
-import { MESI, SPAZIO_ANNO, SPAZIO_MESE, altezzaMese } from './foglio.js';
+import { MESI, SPAZIO_ANNO, SPAZIO_MESE, altezzaMese, ariaDopo } from './foglio.js';
 
 // "Condividi": un'immagine del foglio di calendario (data, ricorrenze, frase) con i colori del tema
 // attivo. Dove si può la si passa al menu di condivisione del sistema, altrimenti si scarica.
@@ -43,7 +43,8 @@ function componi(ctx, colore, { data, frase, ricorrenze }, alto) {
   const a = ctx.measureText(anno);
   // L'anno ruotato: la sua lunghezza diventa altezza, salita e discesa diventano larghezza
   const larghezzaAnno = a.actualBoundingBoxAscent + a.actualBoundingBoxDescent;
-  const larghezza = g.actualBoundingBoxLeft + g.actualBoundingBoxRight + SPAZIO_ANNO * k + larghezzaAnno;
+  const spazioAnno = (SPAZIO_ANNO + ariaDopo(giorno)) * k;
+  const larghezza = g.actualBoundingBoxLeft + g.actualBoundingBoxRight + spazioAnno + larghezzaAnno;
   const origineGiorno = (LARGHEZZA - larghezza) / 2 + g.actualBoundingBoxLeft;
   const annoSu = alto;
   const annoGiu = alto + a.width;
@@ -57,7 +58,7 @@ function componi(ctx, colore, { data, frase, ricorrenze }, alto) {
   ctx.save();
   ctx.fillStyle = colore('--color-3');
   ctx.font = `800 ${96 * k}px ${FONT}`;
-  const sinistraAnno = origineGiorno + g.actualBoundingBoxRight + SPAZIO_ANNO * k;
+  const sinistraAnno = origineGiorno + g.actualBoundingBoxRight + spazioAnno;
   ctx.translate(sinistraAnno + a.actualBoundingBoxDescent, annoSu);
   ctx.rotate(Math.PI / 2);
   ctx.fillText(anno, 0, 0);
@@ -76,7 +77,7 @@ function componi(ctx, colore, { data, frase, ricorrenze }, alto) {
   let y = baseMese;
   if (ricorrenze.length) {
     ctx.fillStyle = colore('--color-1');
-    ctx.font = `700 36px ${FONT}`;
+    ctx.font = `700 34px ${FONT}`;
     y += 22;
     for (const nome of ricorrenze) {
       y += 46;
@@ -91,17 +92,18 @@ function componi(ctx, colore, { data, frase, ricorrenze }, alto) {
   ctx.lineTo(LARGHEZZA / 2 + mezzaLinea, lineaY);
   ctx.stroke();
 
-  // Frase, rimpicciolita se è lunga
-  y = lineaY + 30;
+  // Frase nelle proporzioni della pagina sul telefono (circa un decimo dell'altezza del giorno),
+  // rimpicciolita se è lunga
+  y = lineaY + 24;
   ctx.fillStyle = colore('--color-3');
-  let corpo = 58;
+  let corpo = 42;
   let righe;
   do {
     ctx.font = `400 ${corpo}px ${FONT}`;
-    righe = aCapo(ctx, `«${frase.testo}»`, LARGHEZZA * 0.78);
-    corpo -= 4;
-  } while (righe.length * corpo * 1.3 > 520 && corpo > 30);
-  corpo += 4;
+    righe = aCapo(ctx, `«${frase.testo}»`, LARGHEZZA * 0.72);
+    corpo -= 2;
+  } while (righe.length * corpo * 1.3 > 420 && corpo > 28);
+  corpo += 2;
   for (const riga of righe) {
     y += corpo * 1.3;
     ctx.fillText(riga, LARGHEZZA / 2, y);

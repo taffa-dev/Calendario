@@ -5,7 +5,5 @@ import './tema.css';
 
 createApp(App).mount('#app');
 
-// App installabile e apribile senza rete (solo nella build: in sviluppo darebbe fastidio)
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
-}
+// Non più app installabile: si disattiva il service worker rimasto a chi l'aveva installata
+navigator.serviceWorker?.getRegistrations().then((registrazioni) => registrazioni.forEach((r) => r.unregister()));

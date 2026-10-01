@@ -3,8 +3,6 @@
   --color-1: #B54A4A;
   --color-2: #5B0000;
   --color-3: #280000;
-  /* Fumetti della guida: nel tema scuro prendono il colore dell'anno */
-  --color-guida: var(--color-2);
   /* Passaggio tra tema chiaro e scuro, uguale per sfondo e testi */
   --cambio-tema: 2s ease-out;
 }
@@ -14,7 +12,6 @@
   --color-1: #d17a32;
   --color-2: #b33a3a;
   --color-3: #c37f63;
-  --color-guida: var(--color-3);
 }
 
 @media (prefers-reduced-motion: reduce) {

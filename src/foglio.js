@@ -21,6 +21,11 @@ const CIFRE = {
 export const SPAZIO_ANNO = 14;
 export const SPAZIO_MESE = 7;
 
+// Correzione ottica dopo l'ultima cifra: il piede dell'1 (e la punta del 7) è un filo sottile che
+// arriva fin sotto l'anno, e a pari distanza misurata sembra attaccato
+const ARIA_DOPO = { 1: 8, 7: 3 };
+export const ariaDopo = (giorno) => ARIA_DOPO[String(giorno).at(-1)] ?? 0;
+
 // Quanto sale e quanto scende l'inchiostro del giorno, e il vuoto a destra dell'ultima cifra
 export function inchiostroGiorno(giorno) {
   const cifre = [...String(giorno)].map((c) => CIFRE[c]);
@@ -56,7 +61,7 @@ export function impaginazione(giorno, mese) {
   const cimaMese = BASE_GIORNO + BASE_MESE - altezzaMese(mese);
   return {
     spostaGiorno,
-    vicinoAnno: SPAZIO_ANNO - (vuotoDestra + PADDING_GIORNO + VUOTO_PRIMA_ANNO),
+    vicinoAnno: SPAZIO_ANNO + ariaDopo(giorno) - (vuotoDestra + PADDING_GIORNO + VUOTO_PRIMA_ANNO),
     spazioMese: fondo + SPAZIO_MESE - cimaMese
   };
 }
