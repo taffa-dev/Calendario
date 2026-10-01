@@ -15,6 +15,7 @@ import Icona from './components/Icona.vue';
 import Guida from './components/Guida.vue';
 
 const PILLS_URL = 'https://taffa-dev.github.io/Pills/';
+// Il form prende il tema del Calendario dal link (e se lo ricorda)
 const SUGGERIMENTI_URL = 'https://frase-celebre.taffa-dev.site/';
 
 const oggi = ref(getOggi());
@@ -91,7 +92,7 @@ onBeforeUnmount(() => {
   <button class="icona in-basso a-sinistra" type="button" @click="condividiGiorno" aria-label="Condividi">
     <Icona nome="condividi" />
   </button>
-  <a class="icona in-basso a-destra" :href="SUGGERIMENTI_URL" aria-label="Proponi una frase">
+  <a class="icona in-basso a-destra" :href="`${SUGGERIMENTI_URL}?tema=${tema}`" aria-label="Proponi una frase">
     <Icona nome="proponi" />
   </a>
 

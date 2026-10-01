@@ -1,4 +1,4 @@
-/* Stessi colori e font del Calendario; tema dal sistema */
+/* Stessi colori e font del Calendario; tema quello del Calendario (color-theme, dal link o dal cookie), altrimenti del sistema */
 @font-face { font-family: 'Abhaya Libre'; font-weight: 400; font-display: swap; src: url(/font/abhaya-libre-400-latin.woff2) format('woff2'); }
 @font-face { font-family: 'Abhaya Libre'; font-weight: 700; font-display: swap; src: url(/font/abhaya-libre-700-latin.woff2) format('woff2'); }
 @font-face { font-family: 'Abhaya Libre'; font-weight: 800; font-display: swap; src: url(/font/abhaya-libre-800-latin.woff2) format('woff2'); }
@@ -12,8 +12,17 @@
   color-scheme: light;
 }
 
+:root[color-theme="dark"] {
+  --color-bg: #230505;
+  --color-1: #d17a32;
+  --color-2: #b33a3a;
+  --color-3: #c37f63;
+  --campo: #2d0a0a;
+  color-scheme: dark;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([color-theme]) {
     --color-bg: #230505;
     --color-1: #d17a32;
     --color-2: #b33a3a;
@@ -58,7 +67,7 @@ form { display: flex; flex-direction: column; gap: 0.4rem; }
 label { font-weight: 700; }
 .spunta { font-weight: 400; display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.6rem; }
 
-textarea, input:not([type=checkbox]) {
+textarea, input:not([type=checkbox]), select {
   font: inherit;
   color: inherit;
   background: var(--campo);
@@ -69,7 +78,7 @@ textarea, input:not([type=checkbox]) {
 
 textarea { resize: vertical; margin-bottom: 0.6rem; }
 input:disabled { opacity: 0.4; }
-textarea:focus, input:focus { outline: 2px solid var(--color-1); outline-offset: 1px; }
+textarea:focus, input:focus, select:focus { outline: 2px solid var(--color-1); outline-offset: 1px; }
 
 button {
   font: inherit;
@@ -85,8 +94,17 @@ button {
 
 button:disabled { opacity: 0.4; cursor: default; }
 
+button.secondario {
+  color: var(--color-1);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-1) 50%, transparent);
+  padding: 0.3rem 0.8rem;
+  font-weight: 400;
+}
+
 @media (hover: hover) and (pointer: fine) {
   button:not(:disabled):hover { background: var(--color-1); }
+  button.secondario:hover { color: var(--color-bg); }
 }
 
 .cf-turnstile { margin: 0.4rem 0 0.6rem; min-height: 65px; }
@@ -105,4 +123,8 @@ button:disabled { opacity: 0.4; cursor: default; }
 .proposta.pubblicata .stato { color: var(--color-3); }
 .riga { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.6rem; }
 .riga label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; }
+.date { border: none; margin: 0.4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.date legend { font-weight: 700; font-size: 0.9rem; padding: 0; margin-bottom: 0.2rem; }
+.data { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 0.4rem; align-items: center; max-width: 24rem; }
+.data input, .data select { min-width: 0; font-size: 0.95rem; padding: 0.4rem; }
 .bottoni { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }

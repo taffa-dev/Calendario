@@ -11,7 +11,10 @@ Raspberry Pi `taffa-pi`, dietro il tunnel Cloudflare condiviso `taffa-dev-tunnel
   sia in `ADMIN_EMAIL`: se Access fosse configurato male, il pannello resta chiuso.
   Si corregge testo e autore, si aggiungono le regole (giorni, date, probabilità), si approva o
   si scarta. **Pubblica** fa un unico commit di `src/frasi.json` nel repo: la GitHub Action
-  ricalcola il programma e ripubblica il sito.
+  ricalcola il programma e ripubblica il sito. Le date si scelgono col calendario di sistema,
+  ognuna "ogni anno" (diventa `MM-GG`) o "una volta" (`AAAA-MM-GG`).
+- Tema: quello del Calendario, che lo passa nel link (`?tema=dark|light`); il cookie `tema` lo
+  ricorda (anche per il pannello). Senza, segue il sistema.
 
 ## Sviluppo
 

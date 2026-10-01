@@ -14,7 +14,8 @@ const PUBBLICI = new URL('./public/', import.meta.url);
 const TIPI = { '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2' };
 const INVII_ORA = 5;
 const INVII_GIORNO = 200;
-const GIORNI_SETTIMANA = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
+const TEMI = ['dark', 'light'];
+const GIORNI_SETTIMANA =['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
 
 export function configurazioneDaAmbiente(env = process.env) {
   return {
@@ -60,6 +61,16 @@ export function pulisciIniziali(iniziali) {
 
 const senzaAccenti = (testo) => testo.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 const elenco = (testo) => spazi(testo).split(/\s*,\s*/).filter(Boolean);
+
+// Selettori di data del pannello (AAAA-MM-GG + "ogni anno" / "solo quell'anno") → "12-25, 2026-10-31"
+export function dateDalModulo(date, ripeti) {
+  const quando = [ripeti ?? []].flat();
+  return [date ?? []].flat()
+    .map((data, i) => (spazi(data) && quando[i] === 'anno' ? spazi(data).slice(5) : spazi(data)))
+    .filter(Boolean)
+    .filter((data, i, tutte) => tutte.indexOf(data) === i)
+    .join(', ');
+}
 
 // Regole del pannello → regole di frasi.json; restituisce { regole } o { errore }
 export function leggiRegole({ giorni, date, probabilita }) {
@@ -122,13 +133,18 @@ export function creaServer(config) {
       corpo += pezzo;
       if (corpo.length > 16_384) throw Object.assign(new Error('troppo grande'), { stato: 413 });
     }
-    return Object.fromEntries(new URLSearchParams(corpo));
+    // I campi ripetuti (le date del pannello) diventano elenchi
+    const campi = {};
+    for (const [nome, valore] of new URLSearchParams(corpo)) {
+      campi[nome] = Object.hasOwn(campi, nome) ? [campi[nome]].flat().concat(valore) : valore;
+    }
+    return campi;
   }
 
-  async function proponi(richiesta, risposta) {
+  async function proponi(richiesta, risposta, tema) {
     const campi = await leggiCorpo(richiesta);
     const valori = { testo: campi.testo, iniziali: campi.iniziali, anonimo: Boolean(campi.anonimo) };
-    const errore = (testo, stato = 400) => invia(risposta, stato, paginaModulo({ chiaveTurnstile: config.turnstile.chiave, errore: testo, valori }));
+    const errore = (testo, stato = 400) => invia(risposta, stato, paginaModulo({ chiaveTurnstile: config.turnstile.chiave, errore: testo, valori, tema }));
 
     // Trappola riempita: si finge che sia andata bene, senza salvare nulla
     if (campi.sito) return vaiA(risposta, '/grazie');
@@ -160,6 +176,7 @@ export function creaServer(config) {
     const azione = campi.azione;
     if (['salva', 'approva'].includes(azione)) {
       if (proposta.stato === 'pubblicata') return vaiA(risposta, '/admin');
+      if ('data' in campi) campi.date = dateDalModulo(campi.data, campi.ripeti);
       const { regole, errore } = leggiRegole(campi);
       const testo = pulisciTesto(campi.testo);
       const autore = spazi(campi.autore);
@@ -211,6 +228,14 @@ export function creaServer(config) {
 
     if (metodo === 'GET' && percorso === '/salute') return invia(risposta, 200, 'ok', 'text/plain');
 
+    // Tema: il Calendario lo passa nel link (?tema=dark|light), il cookie lo ricorda; senza, segue il sistema
+    const temaNelLink = TEMI.includes(url.searchParams.get('tema')) ? url.searchParams.get('tema') : '';
+    const temaNelCookie = /(?:^|;\s*)tema=(dark|light)(?:;|$)/.exec(richiesta.headers.cookie ?? '')?.[1] ?? '';
+    const tema = temaNelLink || temaNelCookie;
+    const ricordaTema = temaNelLink && temaNelLink !== temaNelCookie
+      ? { 'set-cookie': `tema=${temaNelLink}; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly` }
+      : {};
+
     if (metodo === 'GET' && /^\/(stile\.css|modulo\.js|font\/[\w-]+\.woff2)$/.test(percorso)) {
       const file = await readFile(new URL(percorso.slice(1), PUBBLICI));
       return invia(risposta, 200, file, TIPI[percorso.slice(percorso.lastIndexOf('.'))], { 'cache-control': 'public, max-age=86400' });
@@ -218,25 +243,25 @@ export function creaServer(config) {
 
     // Moduli inviati da un'altra origine: rifiutati
     if (metodo === 'POST' && config.accesso !== 'sviluppo' && richiesta.headers.origin !== config.origine) {
-      return invia(risposta, 403, paginaErrore('Non permesso', 'Richiesta da un\'altra pagina.'));
+      return invia(risposta, 403, paginaErrore('Non permesso', 'Richiesta da un\'altra pagina.', tema));
     }
 
-    if (percorso === '/' && metodo === 'GET') return invia(risposta, 200, paginaModulo({ chiaveTurnstile: config.turnstile.chiave }));
-    if (percorso === '/' && metodo === 'POST') return proponi(richiesta, risposta);
-    if (percorso === '/grazie' && metodo === 'GET') return invia(risposta, 200, paginaGrazie());
+    if (percorso === '/' && metodo === 'GET') return invia(risposta, 200, paginaModulo({ chiaveTurnstile: config.turnstile.chiave, tema }), undefined, ricordaTema);
+    if (percorso === '/' && metodo === 'POST') return proponi(richiesta, risposta, tema);
+    if (percorso === '/grazie' && metodo === 'GET') return invia(risposta, 200, paginaGrazie({ tema }), undefined, ricordaTema);
 
     if (percorso === '/admin' || percorso.startsWith('/admin/')) {
       const email = await chiEntra(richiesta);
-      if (!email) return invia(risposta, 403, paginaErrore('Non permesso', 'Questa pagina è solo per chi cura il Calendario.'));
+      if (!email) return invia(risposta, 403, paginaErrore('Non permesso', 'Questa pagina è solo per chi cura il Calendario.', tema));
       if (percorso === '/admin' && metodo === 'GET') {
-        return invia(risposta, 200, paginaAdmin({ proposte: archivio.elenco(), email, repo: config.github.repo, messaggio: url.searchParams.get('m') ?? '' }));
+        return invia(risposta, 200, paginaAdmin({ proposte: archivio.elenco(), email, repo: config.github.repo, messaggio: url.searchParams.get('m') ?? '', tema }), undefined, ricordaTema);
       }
       const proposta = /^\/admin\/proposte\/(\d+)$/.exec(percorso);
       if (proposta && metodo === 'POST') return aggiornaProposta(Number(proposta[1]), richiesta, risposta);
       if (percorso === '/admin/pubblica' && metodo === 'POST') return pubblica(risposta);
     }
 
-    invia(risposta, 404, paginaErrore('Non trovata', 'Questa pagina non esiste.'));
+    invia(risposta, 404, paginaErrore('Non trovata', 'Questa pagina non esiste.', tema));
   }
 
   const server = http.createServer((richiesta, risposta) => {

@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { generateKeyPair, exportJWK, SignJWT } from 'jose';
-import { creaServer, pulisciIniziali, pulisciTesto, leggiRegole } from '../server.mjs';
+import { creaServer, pulisciIniziali, pulisciTesto, leggiRegole, dateDalModulo } from '../server.mjs';
 
 // Servizi finti: Turnstile (accetta solo il token "buono"), GitHub (un frasi.json in memoria),
 // chiavi pubbliche di Cloudflare Access
@@ -88,6 +88,27 @@ test('pulizia: iniziali, virgolette, regole', () => {
   assert.ok(leggiRegole({ giorni: 'giovedi', date: '13-01' }).errore);
   assert.ok(leggiRegole({ giorni: 'festa' }).errore);
   assert.ok(leggiRegole({ probabilita: '0.5' }).errore);
+  // Selettori di data: ogni anno → MM-GG, solo quell'anno → AAAA-MM-GG, vuote e doppie via
+  assert.equal(dateDalModulo(['2026-12-25', '', '2026-10-31', '2027-12-25'], ['anno', 'anno', 'una', 'anno']), '12-25, 2026-10-31');
+  assert.equal(dateDalModulo('', 'anno'), '');
+});
+
+test('tema: dal link del Calendario, poi dal cookie; senza, quello del sistema', async () => {
+  const s = await avvia();
+  try {
+    let r = await fetch(s.base + '/');
+    assert.doesNotMatch(await r.text(), /color-theme=/);
+    assert.equal(r.headers.get('set-cookie'), null);
+    r = await fetch(s.base + '/?tema=dark');
+    assert.match(await r.text(), /<html lang="it" color-theme="dark">/);
+    assert.match(r.headers.get('set-cookie'), /^tema=dark;/);
+    r = await fetch(s.base + '/grazie', { headers: { cookie: 'tema=dark' } });
+    assert.match(await r.text(), /color-theme="dark"/);
+    r = await fetch(s.base + '/?tema=<script>', { headers: { cookie: 'tema=light' } });
+    assert.match(await r.text(), /color-theme="light"/);
+  } finally {
+    await s.chiudi();
+  }
 });
 
 test('form: proposta salvata, anonimo, trappola, captcha, limiti', async () => {
@@ -151,6 +172,16 @@ test('pannello: correggi, approva, pubblica con un commit di frasi.json', async 
     await s.invia(`/admin/proposte/${due}`, { azione: 'approva', testo: 'Assurdo.', autore: 'N.S.', giorni: '', date: '', probabilita: '' }, admin);
     await s.invia(`/admin/proposte/${tre}`, { azione: 'scarta' }, admin);
     assert.equal(s.archivio.proposta(uno).stato, 'approvata');
+
+    // Date dai selettori del pannello (campi ripetuti); la pagina le rimostra nei selettori
+    await s.invia(`/admin/proposte/${tre}`, [['azione', 'ripristina']], admin);
+    await s.invia(`/admin/proposte/${tre}`, [['azione', 'salva'], ['testo', 'Spam.'], ['autore', 'Y'],
+      ['data', '2026-12-25'], ['ripeti', 'anno'], ['data', '2026-10-31'], ['ripeti', 'una'], ['data', ''], ['ripeti', 'anno']], admin);
+    assert.deepEqual(s.archivio.proposta(tre).regole, { date: ['12-25', '2026-10-31'] });
+    const pannello = await (await fetch(s.base + '/admin', { headers: admin })).text();
+    assert.match(pannello, /type="date" name="data" value="\d{4}-12-25"/);
+    assert.match(pannello, /type="date" name="data" value="2026-10-31"/);
+    await s.invia(`/admin/proposte/${tre}`, { azione: 'scarta' }, admin);
     assert.equal(s.archivio.proposta(tre).stato, 'scartata');
 
     // Senza token di Access non si pubblica
