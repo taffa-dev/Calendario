@@ -81,6 +81,7 @@ function toggleTheme() {
   background: transparent;
   color: var(--color-3);
   padding: 0.35rem;
+  font-size: 1rem;
   cursor: pointer;
   text-decoration: none;
   transition: opacity 0.2s ease;
