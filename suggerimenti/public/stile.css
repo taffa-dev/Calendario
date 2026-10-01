@@ -1,0 +1,108 @@
+/* Stessi colori e font del Calendario; tema dal sistema */
+@font-face { font-family: 'Abhaya Libre'; font-weight: 400; font-display: swap; src: url(/font/abhaya-libre-400-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Abhaya Libre'; font-weight: 700; font-display: swap; src: url(/font/abhaya-libre-700-latin.woff2) format('woff2'); }
+@font-face { font-family: 'Abhaya Libre'; font-weight: 800; font-display: swap; src: url(/font/abhaya-libre-800-latin.woff2) format('woff2'); }
+
+:root {
+  --color-bg: #fff8ec;
+  --color-1: #B54A4A;
+  --color-2: #5B0000;
+  --color-3: #280000;
+  --campo: #fffdf8;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #230505;
+    --color-1: #d17a32;
+    --color-2: #b33a3a;
+    --color-3: #c37f63;
+    --campo: #2d0a0a;
+    color-scheme: dark;
+  }
+}
+
+html, body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-3);
+  font-family: "Abhaya Libre", serif;
+  font-size: 1.1rem;
+}
+
+main {
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: calc(2rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
+}
+
+.foglio { max-width: 30rem; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
+.pannello { max-width: 46rem; }
+
+h1 {
+  margin: 0;
+  color: var(--color-2);
+  font-weight: 800;
+  font-size: 2.6rem;
+  line-height: 1;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-3);
+}
+
+.sottotitolo { margin: 0.6rem 0 1.4rem; font-style: italic; }
+a { color: var(--color-1); }
+code { font-size: 0.9em; }
+
+form { display: flex; flex-direction: column; gap: 0.4rem; }
+label { font-weight: 700; }
+.spunta { font-weight: 400; display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.6rem; }
+
+textarea, input:not([type=checkbox]) {
+  font: inherit;
+  color: inherit;
+  background: var(--campo);
+  border: 1px solid color-mix(in srgb, var(--color-3) 35%, transparent);
+  border-radius: 4px;
+  padding: 0.5rem 0.6rem;
+}
+
+textarea { resize: vertical; margin-bottom: 0.6rem; }
+input:disabled { opacity: 0.4; }
+textarea:focus, input:focus { outline: 2px solid var(--color-1); outline-offset: 1px; }
+
+button {
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-bg);
+  background: var(--color-2);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button:disabled { opacity: 0.4; cursor: default; }
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled):hover { background: var(--color-1); }
+}
+
+.cf-turnstile { margin: 0.4rem 0 0.6rem; min-height: 65px; }
+.nascosto { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.errore, .avviso { padding: 0.5rem 0.7rem; border-left: 3px solid var(--color-1); background: var(--campo); }
+
+/* Pannello */
+.pubblica { margin-bottom: 0.4rem; }
+.pubblica p, .aiuto { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+.aiuto { margin: 0.8rem 0 1.2rem; }
+
+.proposta { border-top: 1px solid color-mix(in srgb, var(--color-3) 25%, transparent); padding: 1rem 0; }
+.proposta header { display: flex; gap: 0.8rem; align-items: baseline; font-size: 0.9rem; margin-bottom: 0.4rem; }
+.stato { font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-1); }
+.proposta.scartata { opacity: 0.55; }
+.proposta.pubblicata .stato { color: var(--color-3); }
+.riga { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.6rem; }
+.riga label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; }
+.bottoni { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }

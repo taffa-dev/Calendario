@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="it">
 
 <head>
   <meta charset="UTF-8">
   <link rel="icon" href="/favicon.ico">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
+  <link rel="apple-touch-icon" href="/icona-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#fff8ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#230505" media="(prefers-color-scheme: dark)">
+  <!-- viewport-fit=cover: l'app installata disegna anche sotto le barre di Android, niente fasce bianche -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Calendario</title>
   <script>
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.setAttribute('color-theme', 'dark');
-    }
+    // Tema prima del primo disegno: la scelta salvata, altrimenti quella del sistema (vedi src/tema.js)
+    (function () {
+      var salvato = null;
+      try { salvato = localStorage.getItem('color-theme'); } catch (e) { }
+      var scuro = salvato ? salvato === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (scuro) document.documentElement.setAttribute('color-theme', 'dark');
+      // Con una scelta salvata, anche le barre del telefono seguono quella e non il sistema
+      if (salvato) document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = scuro ? '#230505' : '#fff8ec'; });
+    })();
   </script>
 </head>
 

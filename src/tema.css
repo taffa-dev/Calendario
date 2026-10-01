@@ -1,0 +1,32 @@
+:root {
+  --color-bg: #fff8ec;
+  --color-1: #B54A4A;
+  --color-2: #5B0000;
+  --color-3: #280000;
+  /* Fumetti della guida: nel tema scuro prendono il colore dell'anno */
+  --color-guida: var(--color-2);
+  /* Passaggio tra tema chiaro e scuro, uguale per sfondo e testi */
+  --cambio-tema: 2s ease-out;
+}
+
+:root[color-theme="dark"] {
+  --color-bg: #230505;
+  --color-1: #d17a32;
+  --color-2: #b33a3a;
+  --color-3: #c37f63;
+  --color-guida: var(--color-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cambio-tema: 0s;
+  }
+}
+
+/* Sfondo anche su html: niente bianco dietro le barre di Android o tirando la pagina */
+html,
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  transition: background-color var(--cambio-tema);
+}

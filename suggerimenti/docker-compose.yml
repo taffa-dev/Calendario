@@ -1,0 +1,27 @@
+# Gira sul Pi in ~/calendario-suggerimenti/ (compose + .env, niente sorgenti).
+#   docker compose --env-file .env pull && docker compose --env-file .env up -d
+# Nome esplicito: senza, compose potrebbe confondere questo stack con altri nella stessa cartella.
+name: calendario-suggerimenti
+
+services:
+  calendario-suggerimenti:
+    image: ghcr.io/taffa-dev/calendario-suggerimenti:latest
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    mem_limit: 128m
+    ports:
+      # Solo loopback, apposta: da fuori si passa dal tunnel Cloudflare. Pubblicarla su 0.0.0.0
+      # aprirebbe il pannello a chiunque sia sulla LAN (stesso buco trovato e chiuso nella Library).
+      # Serve solo per le prove dal Pi o con `ssh -N -L 3200:127.0.0.1:3200 taffa-pi`.
+      - "127.0.0.1:3200:3000"
+    networks:
+      - default
+      # La rete del tunnel condiviso (taffa-dev-tunnel, connettore nel compose della Library):
+      # il tunnel raggiunge il container come http://calendario-suggerimenti:3000
+      - deploy_default
+
+networks:
+  deploy_default:
+    external: true

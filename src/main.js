@@ -1,18 +1,11 @@
-import { createApp } from "vue";
-import App from "./App.vue";
+import { createApp } from 'vue';
+import App from './App.vue';
+import './font.css';
+import './tema.css';
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faSun, faMoon, faPills } from "@fortawesome/free-solid-svg-icons";
+createApp(App).mount('#app');
 
-library.add(faSun);
-library.add(faMoon);
-library.add(faPills);
-
-document.documentElement.classList.add('no-transition');
-
-const app = createApp(App);
-
-app.component("font-awesome-icon", FontAwesomeIcon);
-
-app.mount("#app");
+// App installabile e apribile senza rete (solo nella build: in sviluppo darebbe fastidio)
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+}

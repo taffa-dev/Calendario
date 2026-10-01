@@ -1,0 +1,50 @@
+# Aggiorna il programma (src/programma.json) e pubblica il sito su GitHub Pages (ramo gh-pages).
+# Parte a ogni push su master, ogni lunedì notte (così il programma non si esaurisce) e a mano.
+name: Pubblica
+
+on:
+  push:
+    branches: [master]
+    # Il server dei suggerimenti ha la sua Action; il sito non cambia
+    paths-ignore: ['suggerimenti/**', '.github/workflows/suggerimenti.yml']
+  schedule:
+    - cron: '17 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pubblica
+  cancel-in-progress: false
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    env:
+      # "Oggi" è quello italiano, non quello UTC del server
+      TZ: Europe/Rome
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run programma
+      - name: Salva il programma
+        run: |
+          if ! git diff --quiet src/programma.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/programma.json
+            git commit -m "Aggiorna il programma delle frasi"
+            git pull --rebase
+            git push
+          fi
+      - run: npm run build
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
