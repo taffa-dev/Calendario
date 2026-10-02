@@ -1,6 +1,15 @@
 // Pagine HTML del form pubblico e del pannello. Niente script in linea (la Content-Security-Policy
 // li vieta): il poco JavaScript sta in public/modulo.js.
 
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+
+// Impronta del contenuto negli URL di stile e script: Cloudflare e i browser li tengono un giorno,
+// così a ogni modifica cambia l'URL e nessuno vede la pagina nuova con lo stile vecchio
+const versione = (file) => createHash('sha256').update(readFileSync(new URL(`./public/${file}`, import.meta.url))).digest('hex').slice(0, 10);
+const STILE = `/stile.css?v=${versione('stile.css')}`;
+const MODULO = `/modulo.js?v=${versione('modulo.js')}`;
+
 const esc = (testo) => String(testo ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 const SFONDO = { light: '#fff8ec', dark: '#230505' };
@@ -29,8 +38,8 @@ function pagina(titolo, corpo, { turnstile = false, tema = '', ritorno = true } 
   <meta name="robots" content="noindex">
   ${coloreBarre}
   <title>${esc(titolo)}</title>
-  <link rel="stylesheet" href="/stile.css">
-  <script src="/modulo.js" defer></script>
+  <link rel="stylesheet" href="${STILE}">
+  <script src="${MODULO}" defer></script>
   ${turnstile ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : ''}
 </head>
 <body>
