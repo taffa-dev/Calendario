@@ -80,6 +80,24 @@ Le chiavi `1x000…AA` sono quelle di prova di Turnstile (passa sempre). Senza `
    Aggiornare dopo un push: le ultime due righe. Il nome del progetto compose è esplicito
    (`calendario-suggerimenti`): mai `docker compose down` dalla cartella di un altro stack.
 
+## Notifica Telegram
+
+A ogni nuova proposta il server avvisa il bot "Taffa Pi BOT" (stesso Pi) con una POST webhook
+(`notifiche.mjs`): 5 s di timeout, al massimo 3 tentativi (pause di 1 e 3 s, stesso `event_id`
+perché il bot scarta i doppioni), mai in attesa per l'utente e mai un errore verso di lui. Non
+scatta per il campo trappola né per le proposte respinte. Nel `.env` sul Pi:
+
+```
+BOT_WEBHOOK_URL=http://host.docker.internal:8787/v1/events
+BOT_WEBHOOK_TOKEN=<lo stesso WEBHOOK_TOKEN del bot>
+```
+
+Vuote = nessun avviso. Il compose dà al container `host.docker.internal` (`extra_hosts`). Lato bot:
+deve ascoltare sull'IP del gateway Docker (tipicamente `172.17.0.1`; verificare con
+`docker network inspect bridge`), con `WEBHOOK_ALLOW_PUBLIC_BIND=true` perché non è un range
+loopback/Tailscale, e ufw deve lasciar passare la porta 8787 dalle reti docker
+(es. `sudo ufw allow from 172.16.0.0/12 to any port 8787 proto tcp`).
+
 ## Dati
 
 `~/calendario-suggerimenti/data/proposte.db` sul Pi. Le frasi pubblicate sono comunque nel repo:

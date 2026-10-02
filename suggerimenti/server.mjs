@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { apriArchivio } from './db.mjs';
 import { verificaTurnstile, creaVerificaAccess, creaGitHub } from './esterni.mjs';
 import { paginaModulo, paginaGrazie, paginaAdmin, paginaFrasi, paginaRicorrenze, paginaErrore } from './pagine.mjs';
+import { creaNotificatore } from './notifiche.mjs';
 import { DATA, dataEsiste, ordinaRicorrenze, canonica } from './liste.mjs';
 
 const PUBBLICI = new URL('./public/', import.meta.url);
@@ -44,6 +45,8 @@ export function configurazioneDaAmbiente(env = process.env) {
       percorso: 'src/frasi.json',
       percorsoRicorrenze: env.GITHUB_RICORRENZE ?? 'src/ricorrenze.json'
     },
+    // Bot Telegram che avvisa delle nuove proposte (vuoto = nessun avviso)
+    bot: { url: env.BOT_WEBHOOK_URL ?? '', token: env.BOT_WEBHOOK_TOKEN ?? '' },
     sale: env.SALE_IMPRONTE ?? randomBytes(16).toString('hex')
   };
 }
@@ -180,6 +183,8 @@ export function creaServer(config) {
   }
   const archivio = apriArchivio(config.archivio);
   const github = creaGitHub(config.github);
+  // Iniettabile nei test (config.notificatore), come gli indirizzi di Turnstile e GitHub
+  const notificaProposta = config.notificatore ?? creaNotificatore(config.bot ?? {});
   const verificaAccess = config.accesso === 'access' ? creaVerificaAccess(config.access) : null;
 
   async function chiEntra(richiesta) {
@@ -260,6 +265,8 @@ export function creaServer(config) {
     }
     archivio.registraInvio(impronta);
     archivio.aggiungi({ testo, autore });
+    // Senza await: l'utente non aspetta il bot e un suo guasto non cambia la risposta
+    (async () => notificaProposta({ testo, autore }))().catch(() => {});
     vaiA(risposta, '/grazie');
   }
 

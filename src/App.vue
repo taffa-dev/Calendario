@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, watchEffect, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { tema, cambiaTema } from './tema.js';
 import { getFrase } from './giorno.js';
 import { getOggi, controllaCambioGiorno } from './oggi.js';
@@ -13,6 +13,7 @@ import DataDelGiorno from './components/DataDelGiorno.vue';
 import Frase from './components/Frase.vue';
 import Icona from './components/Icona.vue';
 import Petali from './components/Petali.vue';
+import Coriandoli from './components/Coriandoli.vue';
 import { stagioneDi, applicaStagione } from './stagione.js';
 import {
   elastico, spostato, torna, strappa, porta, riprendi, compare, scompare,
@@ -230,6 +231,17 @@ if ((import.meta.env.DEV && new URLSearchParams(location.search).has('strappo'))
 }
 ricordaGiorno();
 
+// Compleanno sul foglio visto (all'apertura o tornandoci indietro): coriandoli dal basso, a foglio già
+// entrato. Dopo lo strappo del giorno nuovo il foglio entra più tardi
+const scoppio = ref(0);
+const compleanno = computed(() => ricorrenze.value.some((nome) => /^compleanno/i.test(nome)));
+let attesaScoppio;
+watch(() => [giornoDi(giornoVisto.value), compleanno.value], ([, festa]) => {
+  clearTimeout(attesaScoppio);
+  if (festa) attesaScoppio = setTimeout(() => scoppio.value++, strappo.value ? ATTESA_STRAPPO + 1100 : 700);
+}, { immediate: true });
+onBeforeUnmount(() => clearTimeout(attesaScoppio));
+
 // Pagina lasciata aperta: a mezzanotte (o al ritorno sulla scheda) passa al giorno nuovo
 let fermaControllo;
 onMounted(() => {
@@ -253,6 +265,7 @@ onBeforeUnmount(() => {
 
 <template>
   <Petali v-if="stagione === 'pasqua'" />
+  <Coriandoli :scoppio="scoppio" />
 
   <button v-show="indietro < giorniDaLunedi" class="icona freccia a-sinistra" type="button" @click="vai(-1)"
     aria-label="Giorno prima">

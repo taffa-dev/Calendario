@@ -57,7 +57,7 @@ test('mazzo: nessuna ripetizione nel giro, distanza minima tra due uscite', () =
   const normali = new Set(frasiVere.filter((f) => !f.giorni && !f.date).map(chiaveFrase));
   const uscite = [];
   for (let i = 0; i < 2000; i++) {
-    const k = chiaveFrase(getFrase(frasiVere, programma, sposta('2026-10-02', i)));
+    const k = chiaveFrase(getFrase(frasiVere, programma, sposta('2026-10-01', i)));
     if (normali.has(k)) uscite.push(k);
   }
   const n = normali.size;

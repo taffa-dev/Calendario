@@ -11,6 +11,10 @@ services:
     volumes:
       - ./data:/app/data
     mem_limit: 128m
+    # Serve per raggiungere il bot Telegram (Taffa Pi BOT), che gira sull'host e non in un container:
+    # dal container diventa http://host.docker.internal:8787 (indirizzo del gateway Docker).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       # Solo loopback, apposta: da fuori si passa dal tunnel Cloudflare. Pubblicarla su 0.0.0.0
       # aprirebbe il pannello a chiunque sia sulla LAN (stesso buco trovato e chiuso nella Library).
