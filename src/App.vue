@@ -98,33 +98,34 @@ onBeforeUnmount(() => {
     <Icona nome="avanti" />
   </button>
 
-  <button class="icona tema" type="button" @click="cambiaTema"
-    :aria-label="tema === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
-    <Icona :nome="tema === 'light' ? 'luna' : 'sole'" />
-  </button>
-
-  <!-- Le altre azioni stanno raccolte in alto a destra: i quattro quadratini le aprono a ventaglio attorno a sé -->
+  <!-- Le azioni stanno raccolte in alto a sinistra: i quattro quadratini le aprono a ventaglio attorno a sé -->
   <div ref="gruppo" :class="['gruppo', { aperto }]">
     <button class="icona apri" type="button" @click="aperto = !aperto" :aria-expanded="aperto"
       aria-controls="azioni" :aria-label="aperto ? 'Chiudi le azioni' : 'Altre azioni'">
       <Icona nome="gruppo" />
     </button>
-    <!-- Dal basso verso l'alto: Pills, condividi, proponi -->
+    <!-- Da sinistra a destra (da sotto i quadratini al loro fianco): tema, proponi, condividi.
+         Il tema lascia aperto il ventaglio, per riprovarlo -->
     <nav id="azioni" class="voci" aria-label="Azioni">
-      <a class="icona voce" style="--x: -2.7rem; --y: 0rem; --i: 0" :tabindex="aperto ? 0 : -1"
+      <button class="icona voce" style="--x: 0rem; --y: 2.7rem; --i: 0" type="button" :tabindex="aperto ? 0 : -1"
+        @click="cambiaTema" :aria-label="tema === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
+        <Icona :nome="tema === 'light' ? 'luna' : 'sole'" />
+      </button>
+      <a class="icona voce" style="--x: 1.95rem; --y: 1.95rem; --i: 1" :tabindex="aperto ? 0 : -1"
         :href="`${SUGGERIMENTI_URL}?tema=${tema}`" aria-label="Proponi una frase">
         <Icona nome="proponi" />
       </a>
-      <button class="icona voce" style="--x: -1.95rem; --y: 1.95rem; --i: 1" type="button" :tabindex="aperto ? 0 : -1"
+      <button class="icona voce" style="--x: 2.7rem; --y: 0rem; --i: 2" type="button" :tabindex="aperto ? 0 : -1"
         @click="condividiGiorno(); aperto = false" aria-label="Condividi">
         <Icona nome="condividi" />
       </button>
-      <a class="icona voce" style="--x: 0rem; --y: 2.7rem; --i: 2" :tabindex="aperto ? 0 : -1" :href="PILLS_URL"
-        aria-label="Vai a Pills">
-        <Icona nome="pillole" />
-      </a>
     </nav>
   </div>
+
+  <!-- Pills in alto a destra, dove in Pills c'è il link al Calendario -->
+  <a class="icona pills" :href="PILLS_URL" aria-label="Vai a Pills">
+    <Icona nome="pillole" />
+  </a>
 
   <main class="calendario" @touchstart.passive="toccoIniziato" @touchend="toccoFinito">
     <Transition name="sfuma" mode="out-in">
@@ -190,15 +191,15 @@ onBeforeUnmount(() => {
 }
 
 /* env(safe-area-inset-*): nell'app installata le icone restano fuori dalle barre di sistema */
-.tema {
+.gruppo {
   position: fixed;
+  z-index: 10;
   top: calc(0.5rem + env(safe-area-inset-top));
   left: calc(0.5rem + env(safe-area-inset-left));
 }
 
-.gruppo {
+.pills {
   position: fixed;
-  z-index: 10;
   top: calc(0.5rem + env(safe-area-inset-top));
   right: calc(0.5rem + env(safe-area-inset-right));
 }
@@ -217,7 +218,7 @@ onBeforeUnmount(() => {
 .voce {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   opacity: 0;
   visibility: hidden;
   transform: translate(0, 0) scale(0.6);
