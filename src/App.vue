@@ -107,15 +107,15 @@ onBeforeUnmount(() => {
     <!-- Da sinistra a destra (da sotto i quadratini al loro fianco): tema, proponi, condividi.
          Il tema lascia aperto il ventaglio, per riprovarlo -->
     <nav id="azioni" class="voci" aria-label="Azioni">
-      <button class="icona voce" style="--x: 0rem; --y: 2.7rem; --i: 0" type="button" :tabindex="aperto ? 0 : -1"
+      <button class="icona voce" style="--x: 0rem; --y: 4.25rem; --i: 0" type="button" :tabindex="aperto ? 0 : -1"
         @click="cambiaTema" :aria-label="tema === 'light' ? 'Attiva tema scuro' : 'Attiva tema chiaro'">
         <Icona :nome="tema === 'light' ? 'luna' : 'sole'" />
       </button>
-      <a class="icona voce" style="--x: 1.95rem; --y: 1.95rem; --i: 1" :tabindex="aperto ? 0 : -1"
+      <a class="icona voce" style="--x: 3rem; --y: 3rem; --i: 1" :tabindex="aperto ? 0 : -1"
         :href="`${SUGGERIMENTI_URL}?tema=${tema}`" aria-label="Proponi una frase">
         <Icona nome="proponi" />
       </a>
-      <button class="icona voce" style="--x: 2.7rem; --y: 0rem; --i: 2" type="button" :tabindex="aperto ? 0 : -1"
+      <button class="icona voce" style="--x: 4.25rem; --y: 0rem; --i: 2" type="button" :tabindex="aperto ? 0 : -1"
         @click="condividiGiorno(); aperto = false" aria-label="Condividi">
         <Icona nome="condividi" />
       </button>
@@ -168,7 +168,8 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 
-/* Misure gemelle di quelle di Pills: se cambiano qui, vanno cambiate anche là */
+/* Misure gemelle di quelle di Pills: se cambiano qui, vanno cambiate anche là.
+   Icona di 20px in un'area da toccare di 48px (Material 48dp, Apple 44pt, WCAG 2.5.5 44px) */
 .icona {
   z-index: 10;
   display: inline-flex;
@@ -176,8 +177,8 @@ onBeforeUnmount(() => {
   border: none;
   background: transparent;
   color: var(--color-3);
-  padding: 0.35rem;
-  font-size: 1rem;
+  padding: 0.875rem;
+  font-size: 1.25rem;
   cursor: pointer;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -194,14 +195,14 @@ onBeforeUnmount(() => {
 .gruppo {
   position: fixed;
   z-index: 10;
-  top: calc(0.5rem + env(safe-area-inset-top));
-  left: calc(0.5rem + env(safe-area-inset-left));
+  top: env(safe-area-inset-top);
+  left: env(safe-area-inset-left);
 }
 
 .pills {
   position: fixed;
-  top: calc(0.5rem + env(safe-area-inset-top));
-  right: calc(0.5rem + env(safe-area-inset-right));
+  top: env(safe-area-inset-top);
+  right: env(safe-area-inset-right);
 }
 
 /* Aperto il ventaglio, i quattro quadratini ruotano e diventano un rombo */
@@ -233,18 +234,20 @@ onBeforeUnmount(() => {
   transition-delay: calc(var(--i) * 50ms), calc(var(--i) * 50ms), 0s, 0s;
 }
 
+/* Frecce larghe 44px: lo spazio ai lati del foglio resta quello riservato da --u in DataDelGiorno */
 .freccia {
   position: fixed;
+  padding: 0.875rem 0.75rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
 .a-sinistra {
-  left: calc(0.5rem + env(safe-area-inset-left));
+  left: env(safe-area-inset-left);
 }
 
 .a-destra {
-  right: calc(0.5rem + env(safe-area-inset-right));
+  right: env(safe-area-inset-right);
 }
 
 .icona:focus-visible {
