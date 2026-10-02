@@ -231,17 +231,27 @@ export function paginaRicorrenze({ voci, sha, errore = '', messaggio = '', email
   });
 }
 
+// Riepilogo delle regole, mostrato a "Regole" chiuso (lo ricalcola public/modulo.js mentre si scrive)
+function riepilogoRegole(f) {
+  const parti = [];
+  if (f.giorni?.length) parti.push(f.giorni.join(', '));
+  if (f.probabilita) parti.push(`${Math.round(f.probabilita * 100)}%`);
+  if (f.date?.length) parti.push(f.date.length === 1 ? '1 data' : `${f.date.length} date`);
+  return parti.join(', ') || 'tutti i giorni';
+}
+
 // Una frase: testo, autore e, in "Regole", giorni, probabilità e date. Senza `indice` è nuova
 function voceFrase(f, indice) {
   const haRegole = Boolean(f.giorni?.length || f.date?.length || f.probabilita);
   return `<div class="voce voce-frase"${indice === undefined ? '' : ` data-indice="${indice}"`}>
-    <textarea name="testo" rows="3" maxlength="300" aria-label="Testo della frase">${esc(f.testo)}</textarea>
     <div class="testa-voce">
-      <label>Autore <input name="autore" maxlength="40" value="${esc(f.autore)}"></label>
+      <span class="etichetta-voce">Frase</span>
       <button type="button" class="secondario elimina-voce" aria-label="Elimina la frase">×</button>
     </div>
+    <textarea name="testo" rows="2" maxlength="300" aria-label="Testo della frase">${esc(f.testo)}</textarea>
+    <label class="autore">Autore <input name="autore" maxlength="40" value="${esc(f.autore)}"></label>
     <details class="regole"${haRegole ? ' open' : ''}>
-      <summary>Regole</summary>
+      <summary><span class="chevron" aria-hidden="true"></span>Regole<span class="riepilogo"> · ${esc(riepilogoRegole(f))}</span></summary>
       <div class="riga">
         <label>Giorni <input name="giorni" placeholder="giovedì, venerdì" value="${esc((f.giorni ?? []).join(', '))}"></label>
         <label>Probabilità <input name="probabilita" type="number" min="0" max="1" step="0.05" placeholder="sempre" value="${esc(f.probabilita ?? '')}"></label>

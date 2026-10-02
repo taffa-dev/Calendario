@@ -247,3 +247,25 @@ if (editor) {
   });
   aggiorna();
 }
+
+// Frasi: il riepilogo accanto a "Regole" (visibile a scheda chiusa) segue quello che si scrive
+{
+  const riepilogo = (voce) => {
+    const parti = [];
+    const giorni = voce.querySelector('[name="giorni"]')?.value.trim();
+    if (giorni) parti.push(giorni);
+    const p = Number(voce.querySelector('[name="probabilita"]')?.value);
+    if (p) parti.push(`${Math.round(p * 100)}%`);
+    const date = [...voce.querySelectorAll('.date [name="data"]')].filter((d) => d.value).length;
+    if (date) parti.push(date === 1 ? '1 data' : `${date} date`);
+    return ` · ${parti.join(', ') || 'tutti i giorni'}`;
+  };
+  const aggiorna = (evento) => {
+    const voce = evento.target.closest?.('.voce-frase');
+    const campo = voce?.querySelector('.riepilogo');
+    if (campo) campo.textContent = riepilogo(voce);
+  };
+  document.addEventListener('input', aggiorna);
+  document.addEventListener('change', aggiorna);
+  document.addEventListener('click', (evento) => setTimeout(() => aggiorna(evento), 0));
+}

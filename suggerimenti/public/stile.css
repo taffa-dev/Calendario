@@ -251,16 +251,29 @@ button.secondario, .pulsante.secondario {
 #esito:empty { display: none; }
 
 .elenco:empty::before { content: attr(data-vuoto); display: block; padding: 1rem 0; font-style: italic; }
-.voce { border-top: 1px solid color-mix(in srgb, var(--color-3) 25%, transparent); padding: 0.8rem 0 0.8rem 0.6rem; border-left: 3px solid transparent; margin-left: -0.6rem; }
+.voce { border-top: 1px solid color-mix(in srgb, var(--color-3) 25%, transparent); padding: 0.6rem 0 0.8rem; }
 .voce[hidden] { display: none; }
 .elenco > .voce:first-child { border-top: none; }
-.voce-errata { border-left-color: var(--errore); }
+/* Scheda con un errore: cornice fuori dalla scheda (non sposta né allarga nulla) */
+.voce-errata { outline: 2px solid var(--errore); outline-offset: 4px; border-radius: 2px; }
 .voce-ricorrenza { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 .voce-ricorrenza .nome-voce { flex: 1 1 14rem; min-width: 0; }
 .voce-ricorrenza .data { flex: 1 1 16rem; }
-.voce-frase { display: flex; flex-direction: column; gap: 0.4rem; }
-.testa-voce { display: flex; gap: 0.6rem; align-items: flex-end; }
-.testa-voce label { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; min-width: 0; }
-.regole summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; min-height: 44px; display: flex; align-items: center; }
+.voce-frase { display: flex; flex-direction: column; gap: 0.3rem; }
+.voce-frase textarea { box-sizing: border-box; width: 100%; field-sizing: content; }
+.voce-frase .autore { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.8rem; opacity: 0.9; }
+.voce-frase .autore input { box-sizing: border-box; font-size: 1rem; width: 100%; }
+/* Testa della scheda: etichetta a sinistra, × discreta a destra (area da 44px, ma senza ingombro in altezza) */
+.testa-voce { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
+.etichetta-voce { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.75; }
+.testa-voce .elimina-voce { margin: -10px 0; border-color: transparent; opacity: 0.75; }
+.regole summary { cursor: pointer; list-style: none; font-weight: 700; font-size: 0.9rem; min-height: 44px; display: flex; align-items: center; gap: 0.5rem; }
+.regole summary::-webkit-details-marker { display: none; }
+.regole .chevron { width: 0.5rem; height: 0.5rem; margin: 0 0.25rem 0 0.15rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform 0.2s; flex: none; }
+.regole[open] .chevron { transform: rotate(45deg); }
+.regole .riepilogo { font-weight: 400; opacity: 0.75; white-space: pre; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.regole[open] .riepilogo { display: none; }
 .regole[open] summary { margin-bottom: 0.2rem; }
+@media (prefers-reduced-motion: reduce) { .regole .chevron { transition: none; } }
+@media (hover: hover) and (pointer: fine) { .testa-voce .elimina-voce:hover { opacity: 1; border-color: color-mix(in srgb, var(--color-1) 50%, transparent); } }
 .aggiungi-voce { margin: 0.6rem 0; }
