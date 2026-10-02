@@ -32,9 +32,10 @@ export function creaVerificaAccess({ team, aud, certificati }) {
   };
 }
 
-// --- GitHub: src/frasi.json del repo di Calendario ---
-// Stesso formato del file nel repo: una frase per riga
-export const formattaFrasi = (frasi) => `[\n${frasi.map((f) => `  ${JSON.stringify(f)}`).join(',\n')}\n]\n`;
+// --- GitHub: i file di Calendario (src/frasi.json, src/ricorrenze.json) ---
+// Stesso formato dei file nel repo: una voce per riga
+export const formattaVoci = (voci) => (voci.length ? `[\n${voci.map((v) => `  ${JSON.stringify(v)}`).join(',\n')}\n]\n` : '[]\n');
+export const formattaFrasi = formattaVoci;
 
 export function creaGitHub({ api, token, repo, ramo, percorso }) {
   const intestazioni = {
@@ -43,24 +44,34 @@ export function creaGitHub({ api, token, repo, ramo, percorso }) {
     'x-github-api-version': '2022-11-28',
     'user-agent': 'calendario-suggerimenti'
   };
-  const indirizzo = `${api}/repos/${repo}/contents/${percorso}`;
+  const indirizzo = (file) => `${api}/repos/${repo}/contents/${file}`;
+
+  // Una lista JSON del repo, qualunque sia il file, con lo sha che serve a riscriverla
+  async function leggiLista(file) {
+    const risposta = await fetch(`${indirizzo(file)}?ref=${encodeURIComponent(ramo)}`, { headers: intestazioni });
+    if (!risposta.ok) throw Object.assign(new Error(`GitHub: lettura di ${file} non riuscita (${risposta.status})`), { stato: risposta.status });
+    const { content, sha } = await risposta.json();
+    return { voci: JSON.parse(Buffer.from(content, 'base64').toString('utf8')), sha };
+  }
+
+  // Restituisce lo sha del commit creato. Con 409 il file è cambiato dopo la lettura (`stato` sull'errore)
+  async function scriviLista(file, voci, sha, messaggio) {
+    const risposta = await fetch(indirizzo(file), {
+      method: 'PUT',
+      headers: { ...intestazioni, 'content-type': 'application/json' },
+      body: JSON.stringify({ message: messaggio, content: Buffer.from(formattaVoci(voci)).toString('base64'), sha, branch: ramo })
+    });
+    if (!risposta.ok) throw Object.assign(new Error(`GitHub: scrittura di ${file} non riuscita (${risposta.status}: ${await risposta.text()})`), { stato: risposta.status });
+    return (await risposta.json()).commit.sha;
+  }
 
   return {
+    leggiLista,
+    scriviLista,
     async leggiFrasi() {
-      const risposta = await fetch(`${indirizzo}?ref=${encodeURIComponent(ramo)}`, { headers: intestazioni });
-      if (!risposta.ok) throw new Error(`GitHub: lettura di ${percorso} non riuscita (${risposta.status})`);
-      const { content, sha } = await risposta.json();
-      return { frasi: JSON.parse(Buffer.from(content, 'base64').toString('utf8')), sha };
+      const { voci, sha } = await leggiLista(percorso);
+      return { frasi: voci, sha };
     },
-    // Restituisce lo sha del commit creato
-    async scriviFrasi(frasi, sha, messaggio) {
-      const risposta = await fetch(indirizzo, {
-        method: 'PUT',
-        headers: { ...intestazioni, 'content-type': 'application/json' },
-        body: JSON.stringify({ message: messaggio, content: Buffer.from(formattaFrasi(frasi)).toString('base64'), sha, branch: ramo })
-      });
-      if (!risposta.ok) throw new Error(`GitHub: scrittura di ${percorso} non riuscita (${risposta.status}: ${await risposta.text()})`);
-      return (await risposta.json()).commit.sha;
-    }
+    scriviFrasi: (frasi, sha, messaggio) => scriviLista(percorso, frasi, sha, messaggio)
   };
 }

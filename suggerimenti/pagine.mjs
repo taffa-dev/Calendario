@@ -3,6 +3,7 @@
 
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { ordinaRicorrenze } from './liste.mjs';
 
 // Impronta del contenuto negli URL di stile e script: Cloudflare e i browser li tengono un giorno,
 // così a ogni modifica cambia l'URL e nessuno vede la pagina nuova con lo stile vecchio
@@ -109,7 +110,7 @@ function annoPer(meseGiorno) {
 }
 
 // Una data: selettore di sistema + ogni anno / una volta. Il server le rimette in MM-GG / AAAA-MM-GG
-function rigaData(data, modificabile) {
+function rigaData(data, modificabile, { togli = modificabile } = {}) {
   const ogniAnno = !/^\d{4}-/.test(data);
   const valore = data && ogniAnno ? `${annoPer(data)}-${data}` : data;
   return `<div class="data">
@@ -118,7 +119,7 @@ function rigaData(data, modificabile) {
           <option value="anno" ${ogniAnno ? 'selected' : ''}>ogni anno</option>
           <option value="una" ${ogniAnno ? '' : 'selected'}>una volta</option>
         </select>
-        ${modificabile ? '<button type="button" class="secondario togli" aria-label="Togli la data">×</button>' : ''}
+        ${togli ? '<button type="button" class="secondario togli" aria-label="Togli la data">×</button>' : ''}
       </div>`;
 }
 
@@ -130,15 +131,17 @@ function schedaProposta(p, repo) {
   const r = p.regole;
   const modificabile = p.stato !== 'pubblicata';
   const bottoni = {
-    nuova: ['salva:Salva', 'approva:Approva', 'scarta:Scarta'],
-    approvata: ['salva:Salva', 'ripristina:Rimetti da vedere', 'scarta:Scarta'],
+    nuova: ['approva:Approva', 'scarta:Scarta'],
+    approvata: ['ripristina:Rimetti da vedere', 'scarta:Scarta'],
     scartata: ['ripristina:Rimetti da vedere', 'elimina:Elimina'],
     pubblicata: []
   }[p.stato];
+  // Nuove e approvate si salvano da sole mentre si scrive (modulo.js); le altre non si salvano
+  const autosalva = ['nuova', 'approvata'].includes(p.stato);
   return `<article class="proposta ${p.stato}">
   <header><span class="stato">${STATI[p.stato]}</span> <time datetime="${esc(p.ricevuta)}">${esc(giornoRicevuta(p.ricevuta))}</time>
     ${p.commit_sha ? `<a href="https://github.com/${esc(repo)}/commit/${esc(p.commit_sha)}">commit</a>` : ''}</header>
-  <form method="post" action="/admin/proposte/${p.id}">
+  <form method="post" action="/admin/proposte/${p.id}"${autosalva ? ' data-autosalva autocomplete="off"' : ''}>
     <textarea name="testo" rows="3" maxlength="300" ${modificabile ? '' : 'readonly'}>${esc(p.testo)}</textarea>
     <div class="riga">
       <label>Autore <input name="autore" maxlength="40" value="${esc(p.autore)}" ${modificabile ? '' : 'readonly'}></label>
@@ -150,14 +153,22 @@ function schedaProposta(p, repo) {
       ${[...(r.date ?? []), ...(modificabile ? [''] : [])].map((d) => rigaData(d, modificabile)).join('\n      ')}
       ${modificabile ? '<button type="button" class="secondario aggiungi">+ Aggiungi data</button>' : ''}
     </fieldset>
-    <div class="bottoni">${bottoni.map((b) => { const [azione, etichetta] = b.split(':'); return `<button name="azione" value="${azione}">${etichetta}</button>`; }).join('')}</div>
+    <div class="bottoni">${bottoni.map((b) => { const [azione, etichetta] = b.split(':'); return `<button name="azione" value="${azione}">${etichetta}</button>`; }).join('')}
+      ${autosalva ? '<span class="salvataggio" aria-live="polite"></span>' : ''}</div>
   </form>
 </article>`;
 }
 
+// Schede del pannello: Proposte · Frasi · Ricorrenze
+const SCHEDE = [['/admin', 'Proposte'], ['/admin/frasi', 'Frasi'], ['/admin/ricorrenze', 'Ricorrenze']];
+const schede = (corrente) => `<nav class="schede" aria-label="Pannello">
+    ${SCHEDE.map(([href, nome]) => `<a href="${href}"${nome === corrente ? ' aria-current="page"' : ''}>${nome}</a>`).join('\n    ')}
+  </nav>`;
+
 export function paginaAdmin({ proposte, email, repo, messaggio = '', tema }) {
   const approvate = proposte.filter((p) => p.stato === 'approvata').length;
   return pagina('Proposte', `<main class="pannello">
+  ${schede('Proposte')}
   <h1>Proposte</h1>
   <p class="sottotitolo">${esc(email)}</p>
   ${messaggio ? `<p class="avviso" role="status">${esc(messaggio)}</p>` : ''}
@@ -165,9 +176,93 @@ export function paginaAdmin({ proposte, email, repo, messaggio = '', tema }) {
     <button ${approvate ? '' : 'disabled'}>Pubblica ${approvate === 1 ? '1 frase approvata' : `${approvate} frasi approvate`}</button>
     <p>Le aggiunge a <code>src/frasi.json</code> con un commit: GitHub ricostruisce il sito da solo. Meglio pubblicarne diverse insieme.</p>
   </form>
-  <p class="aiuto">Giorni e date: la frase esce solo in quei giorni (ogni anno o una volta sola; le date vuote non contano). Probabilità: quante volte esce nei suoi giorni (vuota = sempre). Senza giorni né date entra nel mazzo normale.</p>
+  <p class="aiuto">Le modifiche a testo, autore e regole si salvano da sole (accanto ai bottoni compare "Salvato"); Approva salva anche le ultime. Giorni e date: la frase esce solo in quei giorni (ogni anno o una volta sola; le date vuote non contano). Probabilità: quante volte esce nei suoi giorni (vuota = sempre). Senza giorni né date entra nel mazzo normale.</p>
   ${proposte.length ? proposte.map((p) => schedaProposta(p, repo)).join('\n') : '<p>Nessuna proposta, per ora.</p>'}
 </main>`, { tema });
 }
 
 export const paginaErrore = (titolo, testo, tema) => pagina(titolo, `<main class="foglio"><h1>${esc(titolo)}</h1><p>${esc(testo)}</p></main>`, { tema });
+
+// --- Frasi e ricorrenze già pubblicate: si modificano in locale, poi un solo "Pubblica" = un commit ---
+
+// Barra con contatore, stato e Pubblica; resta in vista mentre si scorre l'elenco
+const barraEditor = (filtro) => `<div class="barra-editor">
+    ${filtro}
+    <p class="contatore" id="contatore"></p>
+    <p class="modifiche" id="modifiche" aria-live="polite">Nessuna modifica</p>
+    <button type="submit" id="pubblica-lista" disabled>Pubblica</button>
+  </div>`;
+
+// Pagina di una lista. Errore di lettura: niente editor, solo il messaggio
+function paginaLista({ titolo, tipo, aiuto, errore, messaggio, email, sha, conferma, corpo, tema }) {
+  return pagina(titolo, `<main class="pannello">
+  ${schede(titolo)}
+  <h1>${titolo}</h1>
+  <p class="sottotitolo">${esc(email)}</p>
+  ${errore
+    ? `<p class="avviso in-errore" role="alert">${esc(errore)}</p>`
+    : `<div id="esito" role="status" class="${messaggio ? 'avviso' : ''}">${esc(messaggio)}</div>
+  <p class="aiuto">${aiuto}</p>
+  <form class="editor" method="post" action="/admin/${tipo}" autocomplete="off" data-tipo="${tipo}" data-sha="${esc(sha)}" data-conferma="${esc(conferma)}">
+  ${corpo}
+  </form>`}
+</main>`, { tema });
+}
+
+// Una ricorrenza: nome + data (stesso selettore delle proposte). Senza `indice` è nuova
+function voceRicorrenza(r, indice) {
+  return `<div class="voce voce-ricorrenza"${indice === undefined ? '' : ` data-indice="${indice}"`}>
+    <input name="nome" class="nome-voce" maxlength="60" placeholder="Compleanno di M.G." aria-label="Nome della ricorrenza" value="${esc(r.nome)}">
+    ${rigaData(r.data ?? '', true, { togli: false })}
+    <button type="button" class="secondario elimina-voce" aria-label="Elimina la ricorrenza">×</button>
+  </div>`;
+}
+
+export function paginaRicorrenze({ voci, sha, errore = '', messaggio = '', email, tema }) {
+  const righe = ordinaRicorrenze(voci.map((r, indice) => ({ ...r, indice }))).map((r) => voceRicorrenza(r, r.indice));
+  return paginaLista({
+    titolo: 'Ricorrenze', tipo: 'ricorrenze', errore, messaggio, email, sha, tema,
+    aiuto: 'Compaiono nel Calendario sotto il mese. "Ogni anno" vale ogni anno alla stessa data, "una volta" solo in quell\'anno. Le modifiche restano qui nel browser finché non premi Pubblica, che le manda al repo con un solo commit (poi la GitHub Action ripubblica il sito).',
+    conferma: 'Pubblicare le ricorrenze nel Calendario?',
+    corpo: `${barraEditor('')}
+  <div class="elenco" data-vuoto="Nessuna ricorrenza.">${righe.join('')}</div>
+  <button type="button" class="secondario aggiungi-voce">+ Aggiungi ricorrenza</button>
+  <template id="modello-voce">${voceRicorrenza({})}</template>`
+  });
+}
+
+// Una frase: testo, autore e, in "Regole", giorni, probabilità e date. Senza `indice` è nuova
+function voceFrase(f, indice) {
+  const haRegole = Boolean(f.giorni?.length || f.date?.length || f.probabilita);
+  return `<div class="voce voce-frase"${indice === undefined ? '' : ` data-indice="${indice}"`}>
+    <textarea name="testo" rows="3" maxlength="300" aria-label="Testo della frase">${esc(f.testo)}</textarea>
+    <div class="testa-voce">
+      <label>Autore <input name="autore" maxlength="40" value="${esc(f.autore)}"></label>
+      <button type="button" class="secondario elimina-voce" aria-label="Elimina la frase">×</button>
+    </div>
+    <details class="regole"${haRegole ? ' open' : ''}>
+      <summary>Regole</summary>
+      <div class="riga">
+        <label>Giorni <input name="giorni" placeholder="giovedì, venerdì" value="${esc((f.giorni ?? []).join(', '))}"></label>
+        <label>Probabilità <input name="probabilita" type="number" min="0" max="1" step="0.05" placeholder="sempre" value="${esc(f.probabilita ?? '')}"></label>
+      </div>
+      <fieldset class="date">
+        <legend>Date</legend>
+        ${[...(f.date ?? []), ''].map((d) => rigaData(d, true)).join('\n        ')}
+        <button type="button" class="secondario aggiungi">+ Aggiungi data</button>
+      </fieldset>
+    </details>
+  </div>`;
+}
+
+export function paginaFrasi({ voci, sha, errore = '', messaggio = '', email, tema }) {
+  return paginaLista({
+    titolo: 'Frasi', tipo: 'frasi', errore, messaggio, email, sha, tema,
+    aiuto: 'Le frasi già nel Calendario. Correggere un refuso cambia la chiave della frase: conta come nuova. Eliminare una frase già programmata nei giorni futuri va bene: il programma si ricalcola. Le nuove vanno in fondo al file (l\'ordine conta per il mazzo). Le modifiche restano qui nel browser finché non premi Pubblica: un solo commit.',
+    conferma: 'Pubblicare le frasi nel Calendario?',
+    corpo: `${barraEditor('<input type="search" id="filtro" placeholder="Cerca per testo o autore" aria-label="Cerca nelle frasi" autocomplete="off">')}
+  <button type="button" class="secondario aggiungi-voce">+ Aggiungi frase</button>
+  <div class="elenco" data-vuoto="Nessuna frase.">${voci.map((f, i) => voceFrase(f, i)).join('')}</div>
+  <template id="modello-voce">${voceFrase({})}</template>`
+  });
+}

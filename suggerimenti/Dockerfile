@@ -5,7 +5,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
-COPY server.mjs db.mjs esterni.mjs pagine.mjs ./
+COPY server.mjs db.mjs esterni.mjs liste.mjs pagine.mjs ./
 COPY public ./public
 # Utente node (uid 1000, lo stesso di "taffa" sul Pi): la cartella data/ creata da lui va già bene
 RUN mkdir -p /app/data && chown node:node /app/data

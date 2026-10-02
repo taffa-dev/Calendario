@@ -1,14 +1,16 @@
 // Server delle proposte di frasi per Calendario (gira sul Raspberry Pi, dietro il tunnel Cloudflare).
 // /        form pubblico (Turnstile, limiti di invio, trappola per i programmi automatici)
 // /admin   pannello: si verificano, correggono, approvano e pubblicano le frasi (dietro Cloudflare Access)
-// La pubblicazione è un commit di src/frasi.json nel repo di Calendario: la GitHub Action fa il resto.
+// /admin/frasi, /admin/ricorrenze   si modificano le liste già nel repo (src/frasi.json, src/ricorrenze.json)
+// La pubblicazione è un commit nel repo di Calendario: la GitHub Action fa il resto.
 import http from 'node:http';
 import { createHash, randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { apriArchivio } from './db.mjs';
 import { verificaTurnstile, creaVerificaAccess, creaGitHub } from './esterni.mjs';
-import { paginaModulo, paginaGrazie, paginaAdmin, paginaErrore } from './pagine.mjs';
+import { paginaModulo, paginaGrazie, paginaAdmin, paginaFrasi, paginaRicorrenze, paginaErrore } from './pagine.mjs';
+import { DATA, dataEsiste, ordinaRicorrenze, canonica } from './liste.mjs';
 
 const PUBBLICI = new URL('./public/', import.meta.url);
 const TIPI = { '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2' };
@@ -39,7 +41,8 @@ export function configurazioneDaAmbiente(env = process.env) {
       token: env.GITHUB_TOKEN ?? '',
       repo: env.GITHUB_REPO ?? 'taffa-dev/Calendario',
       ramo: env.GITHUB_BRANCH ?? 'master',
-      percorso: 'src/frasi.json'
+      percorso: 'src/frasi.json',
+      percorsoRicorrenze: env.GITHUB_RICORRENZE ?? 'src/ricorrenze.json'
     },
     sale: env.SALE_IMPRONTE ?? randomBytes(16).toString('hex')
   };
@@ -83,7 +86,7 @@ export function leggiRegole({ giorni, date, probabilita }) {
   }
   const d = elenco(date);
   if (d.length) {
-    const sbagliate = d.filter((x) => !/^(\d{4}-)?(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(x));
+    const sbagliate = d.filter((x) => !DATA.test(x) || !dataEsiste(x));
     if (sbagliate.length) return { errore: `Data non valida (MM-GG o AAAA-MM-GG): ${sbagliate.join(', ')}` };
     regole.date = d;
   }
@@ -95,6 +98,79 @@ export function leggiRegole({ giorni, date, probabilita }) {
     if (n < 1) regole.probabilita = n;
   }
   return { regole };
+}
+
+// --- Liste del pannello (frasi e ricorrenze già nel repo) ---
+const MAX_NOME = 60;
+const MAX_AUTORE = 40;
+const NON_AGGIORNATO = "L'elenco non corrisponde più al file: ricarica la pagina.";
+
+// Le voci in arrivo sono quelle del browser, ognuna con l'`indice` che aveva nel file all'apertura
+// (null se nuova): un indice fuori posto o ripetuto vuol dire pagina vecchia o richiesta strana
+function controllaIndici(voci, vecchie) {
+  if (!Array.isArray(voci)) return { errore: 'Elenco non valido.' };
+  const visti = new Set();
+  for (const [riga, v] of voci.entries()) {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return { errore: 'Elenco non valido.', riga };
+    if (v.indice == null) continue;
+    if (!Number.isInteger(v.indice) || v.indice < 0 || v.indice >= vecchie.length || visti.has(v.indice)) return { errore: NON_AGGIORNATO, riga };
+    visti.add(v.indice);
+  }
+  return null;
+}
+
+// Ricorrenze → { voci: [{ indice, valore: { data, nome } }] } in ordine di calendario, oppure { errore, riga }
+export function leggiRicorrenze(voci, vecchie = []) {
+  const sbagliato = controllaIndici(voci, vecchie);
+  if (sbagliato) return sbagliato;
+  const viste = new Set();
+  const lista = [];
+  for (const [riga, v] of voci.entries()) {
+    const dove = `Riga ${riga + 1}: `;
+    const nome = spazi(v.nome);
+    if (!nome) return { errore: dove + 'manca il nome.', riga };
+    if ([...nome].length > MAX_NOME) return { errore: dove + `il nome è più lungo di ${MAX_NOME} caratteri.`, riga };
+    const data = dateDalModulo(v.data, v.ripeti);
+    if (!data) return { errore: dove + 'manca la data.', riga };
+    if (!dataEsiste(data)) return { errore: dove + `data non valida (${data}).`, riga };
+    if (viste.has(`${data}|${nome}`)) return { errore: dove + "c'è già una ricorrenza uguale (stessa data e stesso nome).", riga };
+    viste.add(`${data}|${nome}`);
+    lista.push({ indice: v.indice ?? null, valore: { data, nome } });
+  }
+  return { voci: ordinaRicorrenze(lista, (x) => x.valore) };
+}
+
+// Frasi → stessa forma. L'ordine nel file conta (il mazzo pesca dalla lista nell'ordine in cui è scritta):
+// quelle già presenti restano dove sono, le nuove vanno in fondo, in ordine di creazione (nel browser
+// l'ultima creata sta in cima, quindi arrivano al contrario)
+export function leggiFrasiPannello(voci, vecchie = []) {
+  const sbagliato = controllaIndici(voci, vecchie);
+  if (sbagliato) return sbagliato;
+  if (!voci.length) return { errore: 'Non si pubblica una lista di frasi vuota.' };
+  const viste = new Set();
+  const lista = [];
+  for (const [riga, v] of voci.entries()) {
+    const vecchia = v.indice == null ? null : vecchie[v.indice];
+    // Un testo o un autore che non si è toccato resta com'è nel file, senza ripulirlo né controllarne la lunghezza
+    // (nel file ce ne sono di più corti del minimo: non devono bloccare la pubblicazione di altro)
+    const testoInvariato = Boolean(vecchia) && String(v.testo ?? '') === vecchia.testo;
+    const autoreInvariato = Boolean(vecchia) && String(v.autore ?? '') === vecchia.autore;
+    const testo = testoInvariato ? vecchia.testo : pulisciTesto(v.testo);
+    const autore = autoreInvariato ? vecchia.autore : spazi(v.autore);
+    const lettere = [...testo];
+    const dove = `«${lettere.slice(0, 30).join('')}${lettere.length > 30 ? '…' : ''}»: `;
+    if (!testoInvariato && (lettere.length < 3 || lettere.length > 300)) return { errore: dove + 'la frase deve essere tra 3 e 300 caratteri.', riga };
+    if (!autore) return { errore: dove + "manca l'autore.", riga };
+    if (!autoreInvariato && [...autore].length > MAX_AUTORE) return { errore: dove + `l'autore è più lungo di ${MAX_AUTORE} caratteri.`, riga };
+    const { regole, errore } = leggiRegole({ giorni: v.giorni, probabilita: v.probabilita, date: dateDalModulo(v.data, v.ripeti) });
+    if (errore) return { errore: dove + errore, riga };
+    if (viste.has(`${testo}|${autore}`)) return { errore: dove + "c'è già una frase uguale (stesso testo e stesso autore).", riga };
+    viste.add(`${testo}|${autore}`);
+    const valore = { testo, autore, ...regole };
+    lista.push({ indice: v.indice ?? null, valore: vecchia && canonica(vecchia) === canonica(valore) ? vecchia : valore });
+  }
+  const presenti = lista.filter((x) => x.indice !== null).sort((a, b) => a.indice - b.indice);
+  return { voci: [...presenti, ...lista.filter((x) => x.indice === null).reverse()] };
 }
 
 // --- Server ---
@@ -122,17 +198,35 @@ export function creaServer(config) {
     risposta.writeHead(stato, { 'content-type': tipo, 'cache-control': 'no-store', ...sicurezza, ...extra });
     risposta.end(corpo);
   };
+  const rispondiJson = (risposta, stato, dati) => invia(risposta, stato, JSON.stringify(dati), 'application/json; charset=utf-8');
   const vaiA = (risposta, dove) => {
     risposta.writeHead(303, { location: dove, ...sicurezza });
     risposta.end();
   };
 
-  async function leggiCorpo(richiesta) {
+  async function leggiGrezzo(richiesta, limite) {
+    richiesta.setEncoding('utf8'); // i caratteri a cavallo di due pezzi non si spezzano
     let corpo = '';
     for await (const pezzo of richiesta) {
       corpo += pezzo;
-      if (corpo.length > 16_384) throw Object.assign(new Error('troppo grande'), { stato: 413 });
+      if (corpo.length > limite) throw Object.assign(new Error('troppo grande'), { stato: 413 });
     }
+    return corpo;
+  }
+
+  // Le liste delle pagine Frasi e Ricorrenze arrivano in JSON e sono più grandi dei moduli
+  async function leggiJson(richiesta, limite = 262_144) {
+    if (!/^application\/json\b/.test(richiesta.headers['content-type'] ?? '')) throw Object.assign(new Error('serve JSON'), { stato: 415 });
+    const corpo = await leggiGrezzo(richiesta, limite);
+    try {
+      return JSON.parse(corpo);
+    } catch {
+      throw Object.assign(new Error('JSON non valido'), { stato: 400 });
+    }
+  }
+
+  async function leggiCorpo(richiesta) {
+    const corpo = await leggiGrezzo(richiesta, 16_384);
     // I campi ripetuti (le date del pannello) diventano elenchi
     const campi = {};
     for (const [nome, valore] of new URLSearchParams(corpo)) {
@@ -170,18 +264,23 @@ export function creaServer(config) {
   }
 
   async function aggiornaProposta(id, richiesta, risposta) {
+    // Il salvataggio automatico della scheda (modulo.js) vuole una risposta JSON; i bottoni, un redirect
+    const comeFetch = richiesta.headers['x-richiesta'] === 'fetch';
+    const rifiuta = (errore, stato = 400) => (comeFetch
+      ? rispondiJson(risposta, stato, { ok: false, errore })
+      : vaiA(risposta, '/admin?m=' + encodeURIComponent(errore)));
     const proposta = archivio.proposta(id);
-    if (!proposta) return vaiA(risposta, '/admin?m=' + encodeURIComponent('Proposta non trovata.'));
+    if (!proposta) return rifiuta('Proposta non trovata.', 404);
     const campi = await leggiCorpo(richiesta);
     const azione = campi.azione;
     if (['salva', 'approva'].includes(azione)) {
-      if (proposta.stato === 'pubblicata') return vaiA(risposta, '/admin');
+      if (proposta.stato === 'pubblicata') return comeFetch ? rifiuta('La proposta è già pubblicata: non si modifica più.') : vaiA(risposta, '/admin');
       if ('data' in campi) campi.date = dateDalModulo(campi.data, campi.ripeti);
       const { regole, errore } = leggiRegole(campi);
       const testo = pulisciTesto(campi.testo);
       const autore = spazi(campi.autore);
-      if (errore) return vaiA(risposta, '/admin?m=' + encodeURIComponent(errore));
-      if (testo.length < 3 || !autore) return vaiA(risposta, '/admin?m=' + encodeURIComponent('Servono frase e autore.'));
+      if (errore) return rifiuta(errore);
+      if (testo.length < 3 || !autore) return rifiuta('Servono frase e autore.');
       archivio.modifica(id, { testo, autore, regole });
       if (azione === 'approva') archivio.cambiaStato(id, 'approvata');
     } else if (azione === 'scarta' && proposta.stato !== 'pubblicata') {
@@ -191,6 +290,7 @@ export function creaServer(config) {
     } else if (azione === 'elimina' && proposta.stato === 'scartata') {
       archivio.elimina(id);
     }
+    if (comeFetch) return rispondiJson(risposta, 200, { ok: true });
     vaiA(risposta, '/admin');
   }
 
@@ -218,6 +318,70 @@ export function creaServer(config) {
     } catch (errore) {
       console.error(errore);
       vaiA(risposta, '/admin?m=' + encodeURIComponent(`Pubblicazione non riuscita: ${errore.message}`));
+    }
+  }
+
+  // Le liste modificabili del pannello: ognuna è un file del repo, riscritto per intero con UN commit
+  const messaggioCommit = (cosa) => ({ aggiunte, tolte, modificate }) => `Aggiorna ${cosa} (+${aggiunte}, −${tolte}, ~${modificate})`;
+  const LISTE = {
+    frasi: {
+      file: config.github.percorso,
+      leggi: leggiFrasiPannello,
+      normalizza: (vecchie) => vecchie,
+      messaggio: messaggioCommit('le frasi')
+    },
+    ricorrenze: {
+      file: config.github.percorsoRicorrenze ?? 'src/ricorrenze.json',
+      leggi: leggiRicorrenze,
+      normalizza: (vecchie) => ordinaRicorrenze(vecchie),
+      messaggio: messaggioCommit('le ricorrenze')
+    }
+  };
+  const CAMBIATO = 'Il file è cambiato nel frattempo: ricarica la pagina.';
+
+  async function mostraLista(risposta, tipo, { email, messaggio, tema, extra }) {
+    let letto = null;
+    let errore = '';
+    if (!config.github.token) errore = 'Manca GITHUB_TOKEN: non posso leggere il file dal repo.';
+    else {
+      try {
+        letto = await github.leggiLista(LISTE[tipo].file);
+      } catch (e) {
+        console.error(e);
+        errore = `Lettura non riuscita: ${e.message}`;
+      }
+    }
+    const pagina = tipo === 'frasi' ? paginaFrasi : paginaRicorrenze;
+    invia(risposta, errore ? 502 : 200, pagina({ voci: letto?.voci ?? [], sha: letto?.sha ?? '', errore, messaggio, email, repo: config.github.repo, tema }), undefined, extra);
+  }
+
+  // Riceve { sha, voci } (lo sha è quello del file all'apertura della pagina) e risponde JSON.
+  // Il commit lo fa solo se qualcosa è cambiato davvero rispetto al repo.
+  async function pubblicaLista(richiesta, risposta, tipo) {
+    const lista = LISTE[tipo];
+    const { sha, voci } = await leggiJson(richiesta);
+    if (!config.github.token) return rispondiJson(risposta, 400, { ok: false, errore: 'Manca GITHUB_TOKEN: non posso pubblicare.' });
+    try {
+      const { voci: vecchie, sha: shaAttuale } = await github.leggiLista(lista.file);
+      if (sha !== shaAttuale) return rispondiJson(risposta, 409, { ok: false, errore: CAMBIATO });
+      const esito = lista.leggi(voci, vecchie);
+      if (esito.errore) return rispondiJson(risposta, 400, { ok: false, errore: esito.errore, riga: esito.riga ?? null });
+      const nuove = esito.voci.map((x) => x.valore);
+      if (canonica(nuove) === canonica(lista.normalizza(vecchie))) {
+        return rispondiJson(risposta, 200, { ok: true, messaggio: 'Niente da pubblicare: il file è già così.' });
+      }
+      const aggiunte = esito.voci.filter((x) => x.indice === null).length;
+      const conteggio = {
+        aggiunte,
+        tolte: vecchie.length - (esito.voci.length - aggiunte),
+        modificate: esito.voci.filter((x) => x.indice !== null && canonica(x.valore) !== canonica(vecchie[x.indice])).length
+      };
+      await github.scriviLista(lista.file, nuove, sha, lista.messaggio(conteggio));
+      rispondiJson(risposta, 200, { ok: true, messaggio: `Pubblicato (+${conteggio.aggiunte}, −${conteggio.tolte}, ~${conteggio.modificate}): tra qualche minuto è nel Calendario.` });
+    } catch (errore) {
+      if (errore.stato === 409) return rispondiJson(risposta, 409, { ok: false, errore: CAMBIATO });
+      console.error(errore);
+      rispondiJson(risposta, 502, { ok: false, errore: `Pubblicazione non riuscita: ${errore.message}` });
     }
   }
 
@@ -256,6 +420,9 @@ export function creaServer(config) {
       if (percorso === '/admin' && metodo === 'GET') {
         return invia(risposta, 200, paginaAdmin({ proposte: archivio.elenco(), email, repo: config.github.repo, messaggio: url.searchParams.get('m') ?? '', tema }), undefined, ricordaTema);
       }
+      const lista = /^\/admin\/(frasi|ricorrenze)$/.exec(percorso);
+      if (lista && metodo === 'GET') return mostraLista(risposta, lista[1], { email, messaggio: url.searchParams.get('m') ?? '', tema, extra: ricordaTema });
+      if (lista && metodo === 'POST') return pubblicaLista(richiesta, risposta, lista[1]);
       const proposta = /^\/admin\/proposte\/(\d+)$/.exec(percorso);
       if (proposta && metodo === 'POST') return aggiornaProposta(Number(proposta[1]), richiesta, risposta);
       if (percorso === '/admin/pubblica' && metodo === 'POST') return pubblica(risposta);

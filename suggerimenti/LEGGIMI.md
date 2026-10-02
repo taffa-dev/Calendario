@@ -9,10 +9,30 @@ Raspberry Pi `taffa-pi`, dietro il tunnel Cloudflare condiviso `taffa-dev-tunnel
 - `https://frase-celebre.taffa-dev.site/admin` — pannello, dietro Cloudflare Access. Il server
   verifica comunque il token firmato di Access (mai l'header con l'email in chiaro) e che l'email
   sia in `ADMIN_EMAIL`: se Access fosse configurato male, il pannello resta chiuso.
-  Si corregge testo e autore, si aggiungono le regole (giorni, date, probabilità), si approva o
-  si scarta. **Pubblica** fa un unico commit di `src/frasi.json` nel repo: la GitHub Action
-  ricalcola il programma e ripubblica il sito. Le date si scelgono col calendario di sistema,
-  ognuna "ogni anno" (diventa `MM-GG`) o "una volta" (`AAAA-MM-GG`).
+  Tre schede in cima: **Proposte · Frasi · Ricorrenze**.
+  - *Proposte*: si corregge testo e autore, si aggiungono le regole (giorni, date, probabilità),
+    si approva o si scarta. Niente "Salva": ogni scheda nuova o approvata si salva da sola
+    (0,7 s dopo l'ultima digitazione, subito a campo finito; accanto ai bottoni compare
+    "Salvato" o l'errore del server, e quel che si sta scrivendo non si perde). Il salvataggio è
+    una `fetch` POST con l'intestazione `x-richiesta: fetch` e risposta JSON; i bottoni (Approva,
+    Scarta, Ripristina, Elimina) restano moduli normali con redirect. **Pubblica** fa un unico
+    commit di `src/frasi.json` nel repo: la GitHub Action ricalcola il programma e ripubblica il
+    sito. Le date si scelgono col calendario di sistema, ognuna "ogni anno" (diventa `MM-GG`) o
+    "una volta" (`AAAA-MM-GG`; il giorno deve esistere: 30/02 e 31/04 si rifiutano).
+  - *Frasi* e *Ricorrenze* (`src/frasi.json`, `src/ricorrenze.json`): si modificano le voci già
+    nel repo (modificare, aggiungere, eliminare). Qui **non** c'è salvataggio automatico, perché
+    ogni salvataggio sarebbe un commit e farebbe ripartire la Action: le modifiche restano nel
+    browser ("Modifiche non pubblicate") e **Pubblica** manda tutta la lista in un solo commit
+    (`POST /admin/frasi|ricorrenze`, JSON, fino a 256 KB), scritto con lo `sha` letto all'apertura.
+    Se il file è cambiato nel frattempo (409) la pagina lo dice senza perdere le modifiche locali;
+    se non è cambiato nulla non fa nessun commit. Le ricorrenze si ordinano per mese-giorno e
+    anno. Le frasi **non si riordinano mai** (il mazzo dipende dall'ordine nel file): le esistenti
+    restano al loro posto, le nuove vanno in fondo; correggere un refuso cambia la chiave della
+    frase (conta come nuova), eliminarne una già programmata va bene (il programma si ricalcola);
+    la lista vuota e i duplicati testo+autore si rifiutano. Le righe che non si toccano non si
+    ricontrollano (nel file ci sono frasi più corte del minimo).
+  Il token `GITHUB_TOKEN` serve per leggere e scrivere i due file; `GITHUB_RICORRENZE` cambia il
+  percorso di quello delle ricorrenze (default `src/ricorrenze.json`).
 - In ogni pagina pubblica, in alto a sinistra, "‹ Calendario" per tornare indietro. Invia resta
   spento ("Attendi la verifica…") finché Turnstile non ha finito; gli errori di frase e iniziali
   stanno sotto il campo. Colori dei pulsanti con contrasto AA in entrambi i temi (`--pulsante*`).

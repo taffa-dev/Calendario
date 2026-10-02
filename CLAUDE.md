@@ -19,7 +19,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `src/tema.js` + script in `index.html` — tema chiaro/scuro; `src/tema.css` colori e `--cambio-tema` (2s); `src/font.css` + `src/assets/fonts/` Abhaya Libre in casa (stessi file di Google Fonts: latin e latin-ext, pesi 400/700/800).
 - `src/components/` — `DataDelGiorno`, `Frase`, `Icona` (icone a contorno sottile nello stile di Lucide, ISC: griglia 24×24, tratto 2, 1em × 1em; sono le icone che aveva Pills, l'utente le preferisce alle Font Awesome piene, "meno ingombranti, più eleganti"). `Icona.vue` è **identico in Pills**: se cambia in uno va copiato nell'altro.
 - `public/` — favicon, `icona-192.png` (icona dei segnalibri) e `sw.js`, che serve solo a disinstallare (sotto).
-- `suggerimenti/` — server delle proposte, gira sul Raspberry Pi (vedi `suggerimenti/LEGGIMI.md`).
+- `suggerimenti/` — server delle proposte, gira sul Raspberry Pi (vedi `suggerimenti/LEGGIMI.md`). Il pannello `/admin` ha tre schede: Proposte (salvataggio automatico di ogni scheda, un commit con "Pubblica"), Frasi e Ricorrenze (modificano `src/frasi.json` e `src/ricorrenze.json` già nel repo: modifiche locali nel browser, "Pubblica" = un solo commit; le nuove frasi vanno sempre in fondo al file perché l'ordine conta per il mazzo). Un file nuovo del server va aggiunto anche al `COPY` del Dockerfile.
 
 ## Scelta della frase
 - **Frasi speciali** (con `giorni` e/o `date`): `giorni: ["giovedì"]` (accenti facoltativi), `date: ["12-25"]` ogni anno o `["2026-12-25"]` una volta. Escono solo in quei giorni: con `probabilita` (0-1) con quella probabilità, senza sempre. Un sorteggio del giorno, separato dal mazzo, diviso in fette nell'ordine: prima le frasi per data, poi quelle per giorno della settimana (il 25/12 vince sul giovedì). La frase del giovedì ha `"probabilita": 0.5`.
@@ -60,6 +60,6 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - Prova da telefono in LAN: porta **3000** (`npx vite --host --port 3000`), come in Pills.
 
 ## Git e deploy
-- La pubblicazione la fa la GitHub Action `.github/workflows/pubblica.yml` a ogni push su `master`, ogni lunedì notte e a mano: test, `npm run programma` (con `TZ=Europe/Rome`), commit di `src/programma.json` se cambia, build, ramo `gh-pages`. Dopo un push fare `git pull` prima di lavorare: la Action aggiunge il suo commit. Anche il server dei suggerimenti pubblica così (commit di `src/frasi.json`).
+- La pubblicazione la fa la GitHub Action `.github/workflows/pubblica.yml` a ogni push su `master`, ogni lunedì notte e a mano: test, `npm run programma` (con `TZ=Europe/Rome`), commit di `src/programma.json` se cambia, build, ramo `gh-pages`. Dopo un push fare `git pull` prima di lavorare: la Action aggiunge il suo commit. Anche il server dei suggerimenti pubblica così (commit di `src/frasi.json` e `src/ricorrenze.json`).
 - `npm run deploy` (`gh-pages -d dist` dal PC) resta come emergenza; usa il programma così com'è nel repo.
 - Identità git, `GIT_TERMINAL_PROMPT=0`/`timeout`, messaggi in italiano: come in Pills. Commit e deploy solo quando l'utente lo chiede.

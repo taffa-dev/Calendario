@@ -13,6 +13,7 @@
   --pulsante: #5B0000;
   --pulsante-sopra: #9c3434;
   --pulsante-testo: #fff8ec;
+  --errore: #a4161a;
   color-scheme: light;
 }
 
@@ -25,6 +26,7 @@
   --pulsante: #d17a32;
   --pulsante-sopra: #e3955a;
   --pulsante-testo: #230505;
+  --errore: #ff9a8f;
   color-scheme: dark;
 }
 
@@ -38,6 +40,7 @@
     --pulsante: #d17a32;
     --pulsante-sopra: #e3955a;
     --pulsante-testo: #230505;
+    --errore: #ff9a8f;
     color-scheme: dark;
   }
 }
@@ -194,3 +197,70 @@ button.secondario, .pulsante.secondario {
 .data { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; gap: 0.4rem; align-items: center; max-width: 24rem; }
 .data input, .data select { min-width: 0; font-size: 0.95rem; padding: 0.4rem; }
 .bottoni { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
+
+/* Aree da toccare di almeno 44px nel pannello */
+.togli, .elimina-voce { min-width: 44px; min-height: 44px; padding: 0; font-size: 1.3rem; line-height: 1; }
+.aggiungi, .aggiungi-voce { min-height: 44px; }
+.bottoni button { min-height: 44px; }
+
+/* Salvataggio automatico delle proposte */
+.salvataggio { align-self: center; font-size: 0.9rem; opacity: 0.75; }
+.salvataggio.in-errore, .avviso.in-errore { color: var(--errore); opacity: 1; font-weight: 700; }
+.avviso.in-errore { border-left-color: var(--errore); }
+
+/* Schede del pannello: Proposte · Frasi · Ricorrenze (a capo sul telefono) */
+.schede { display: flex; flex-wrap: wrap; gap: 0.25rem 1.4rem; margin-bottom: 0.4rem; }
+.schede a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  box-sizing: border-box;
+  color: var(--color-3);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+.schede a[aria-current="page"] { color: var(--color-2); border-bottom-color: var(--color-1); }
+.schede a:focus-visible { outline: 2px solid var(--color-1); outline-offset: 2px; border-radius: 4px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .schede a:not([aria-current="page"]):hover { color: var(--color-1); }
+}
+
+/* Frasi e Ricorrenze: elenco modificabile e barra con Pubblica sempre in vista */
+.barra-editor {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding: 0.5rem 0;
+  margin-bottom: 0.4rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-3) 25%, transparent);
+}
+.barra-editor p { margin: 0; }
+.barra-editor #filtro { flex: 1 1 100%; min-height: 44px; box-sizing: border-box; }
+.contatore { font-weight: 700; }
+.modifiche { flex: 1 1 7rem; min-width: 0; font-size: 0.9rem; opacity: 0.75; }
+.modifiche.da-pubblicare { opacity: 1; color: var(--color-1); font-weight: 700; }
+.barra-editor button { min-height: 44px; margin-left: auto; }
+#esito:empty { display: none; }
+
+.elenco:empty::before { content: attr(data-vuoto); display: block; padding: 1rem 0; font-style: italic; }
+.voce { border-top: 1px solid color-mix(in srgb, var(--color-3) 25%, transparent); padding: 0.8rem 0 0.8rem 0.6rem; border-left: 3px solid transparent; margin-left: -0.6rem; }
+.voce[hidden] { display: none; }
+.elenco > .voce:first-child { border-top: none; }
+.voce-errata { border-left-color: var(--errore); }
+.voce-ricorrenza { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.voce-ricorrenza .nome-voce { flex: 1 1 14rem; min-width: 0; }
+.voce-ricorrenza .data { flex: 1 1 16rem; }
+.voce-frase { display: flex; flex-direction: column; gap: 0.4rem; }
+.testa-voce { display: flex; gap: 0.6rem; align-items: flex-end; }
+.testa-voce label { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem; min-width: 0; }
+.regole summary { cursor: pointer; font-weight: 700; font-size: 0.9rem; min-height: 44px; display: flex; align-items: center; }
+.regole[open] summary { margin-bottom: 0.2rem; }
+.aggiungi-voce { margin: 0.6rem 0; }
