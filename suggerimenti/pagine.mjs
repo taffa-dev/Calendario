@@ -51,7 +51,7 @@ export function paginaModulo({ chiaveTurnstile, errore = null, valori = {}, tema
   const lunghezza = [...String(valori.testo ?? '')].length;
   return pagina('Proponi una frase', `<main class="foglio">
   <h1>Proponi una frase</h1>
-  <p class="sottotitolo">Una frase celebre di un collega, per il Calendario. Le leggiamo tutte prima di pubblicarle.</p>
+  <p class="sottotitolo">Una frase celebre di un collega, per il Calendario.</p>
   ${errore && !errore.campo ? `<p class="errore" role="alert">${esc(errore.testo)}</p>` : ''}
   <form method="post" action="/">
     <div class="campo">
