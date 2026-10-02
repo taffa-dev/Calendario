@@ -14,6 +14,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `src/foglio.js` — mesi e impaginazione di numero, anno e mese (sotto), condivisa da pagina e immagine.
 - `src/condividi.js` — immagine 1080×1350 del foglio (canvas, colori del tema attivo) passata al menu di condivisione; dove non c'è, si scarica.
 - `src/oggi.js` — data di oggi (`?data=` in sviluppo) e cambio giorno a mezzanotte / al ritorno sulla scheda.
+- `src/stagione.js` — tema di Pasqua (dal lunedì santo a Pasquetta, come in Pills): `stagione="pasqua"` su `<html>`, colori in `tema.css` (chiaro: carta rosata; scuro: prugna, petali scuri col bordo argentato dalla luna) e `Petali` (piccoli dietro il foglio, pochi grandi e sfocati davanti, "vicini alla telecamera"; il vento va verso destra, al contrario di Pills). Lo script in `index.html` lo applica prima del primo disegno (Pasqua ricalcolata lì: tenerla allineata). L'utente ha scartato i rami di ciliegio, sia disegnati sia come ombra.
 - `src/tema.js` + script in `index.html` — tema chiaro/scuro; `src/tema.css` colori e `--cambio-tema` (2s); `src/font.css` + `src/assets/fonts/` Abhaya Libre in casa (stessi file di Google Fonts: latin e latin-ext, pesi 400/700/800).
 - `src/components/` — `DataDelGiorno`, `Frase`, `Icona` (tracciati di Font Awesome Free copiati, CC BY 4.0, stesse misure del pacchetto: 1em × 1.25em).
 - `public/` — favicon, `icona-192.png` (icona dei segnalibri) e `sw.js`, che serve solo a disinstallare (sotto).
@@ -36,7 +37,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - Lo script in `index.html` applica il tema prima del primo disegno (scelta salvata, altrimenti quella del sistema): niente lampo del tema sbagliato. `tema.js` lo legge e lo cambia.
 - Attributo `color-theme="dark"` su `<html>` e chiave `localStorage` `color-theme` (`dark`/`light`): non rinominarli, le scelte già salvate andrebbero perse.
 - Ogni testo colorato ha `transition: color var(--cambio-tema)`, così sfuma insieme allo sfondo. `prefers-reduced-motion` azzera la durata.
-- `theme-color` (barre del telefono) segue il tema, anche quando lo si cambia col pulsante.
+- `theme-color` (barre del telefono) segue il tema e la stagione, anche quando lo si cambia col pulsante (`aggiornaBarre()` legge `--color-bg`).
 
 ## Vincoli tecnici
 - Icone in alto gemelle di Pills: `top: calc(0.5rem + env(safe-area-inset-top))` (e così il lato), `padding: 0.35rem`, `font-size: 1rem`, icone `1em`; l'icona a quadratini del Calendario sta dove in Pills c'è il link al Calendario. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
@@ -46,7 +47,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - Nessuna risorsa esterna (font e icone sono in casa).
 
 ## Sviluppo e verifica
-- `npm run dev`, poi `?data=AAAA-MM-GG` per simulare un giorno (solo in sviluppo). Un giovedì con la frase speciale: `?data=2026-10-01`; ricorrenze: `?data=2027-03-29` (Pasquetta), `?data=2026-12-25`. Il pulsantino in basso è il Vue DevTools, solo in dev.
+- `npm run dev`, poi `?data=AAAA-MM-GG` per simulare un giorno (solo in sviluppo). Un giovedì con la frase speciale: `?data=2026-10-01`; ricorrenze e tema di Pasqua: `?data=2027-03-29` (Pasquetta), `?data=2026-12-25`. Il pulsantino in basso è il Vue DevTools, solo in dev.
 - L'utente spesso ha già un `npm run dev` aperto sulla 5173: non chiuderlo; usare un'altra porta (`npx vite --port 5181 --strictPort`).
 - Screenshot/verifiche come in Pills: `playwright-core` in una cartella temporanea (mai nel progetto), Chrome di sistema, `?data=`. Controllare entrambi i temi (`colorScheme`) e una larghezza da telefono (360-390px, `scrollWidth` uguale alla larghezza). Per l'impaginazione, un provino di molti giorni affiancati (cifre diverse, mesi con e senza lettere alte).
 - Prova da telefono in LAN: porta **3000** (`npx vite --host --port 3000`), come in Pills.

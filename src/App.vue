@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watchEffect, onMounted, onBeforeUnmount } from 'vue';
 import { tema, cambiaTema } from './tema.js';
 import { getFrase } from './giorno.js';
 import { getOggi, controllaCambioGiorno } from './oggi.js';
@@ -12,12 +12,18 @@ import ricorrenzePersonali from './ricorrenze.json';
 import DataDelGiorno from './components/DataDelGiorno.vue';
 import Frase from './components/Frase.vue';
 import Icona from './components/Icona.vue';
+import Petali from './components/Petali.vue';
+import { stagioneDi, applicaStagione } from './stagione.js';
 
 const PILLS_URL = 'https://taffa-dev.github.io/Pills/';
 // Il form prende il tema del Calendario dal link (e se lo ricorda)
 const SUGGERIMENTI_URL = 'https://frase-celebre.taffa-dev.site/';
 
 const oggi = ref(getOggi());
+
+// Tema stagionale (Pasqua): colori e petali; segue il giorno se la pagina resta aperta
+const stagione = computed(() => stagioneDi(oggi.value));
+watchEffect(() => applicaStagione(stagione.value));
 
 // Giorni passati della settimana in corso: da lunedì a oggi, niente futuro
 const indietro = ref(0);
@@ -81,6 +87,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <Petali v-if="stagione === 'pasqua'" />
+
   <button v-show="indietro < giorniDaLunedi" class="icona freccia a-sinistra" type="button" @click="vai(-1)"
     aria-label="Giorno prima">
     <Icona nome="indietro" />
@@ -130,6 +138,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .calendario {
+  /* Sopra i petali lontani, sotto quelli vicini */
+  position: relative;
+  z-index: 2;
   box-sizing: border-box;
   min-height: 100vh;
   min-height: 100dvh;
@@ -169,7 +180,13 @@ onBeforeUnmount(() => {
   cursor: pointer;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.2s ease, color var(--cambio-tema);
+  transition: color var(--cambio-tema);
+}
+
+/* Discrete finché non le si indica: l'opacità sta sull'icona, così non si somma a quella del ventaglio */
+.icona :deep(svg) {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
 }
 
 /* env(safe-area-inset-*): nell'app installata le icone restano fuori dalle barre di sistema */
@@ -188,10 +205,11 @@ onBeforeUnmount(() => {
 
 /* Aperto il ventaglio, i quattro quadratini ruotano e diventano un rombo */
 .apri :deep(svg) {
-  transition: transform 0.3s ease;
+  transition: opacity 0.2s ease, transform 0.3s ease;
 }
 
 .aperto .apri :deep(svg) {
+  opacity: 1;
   transform: rotate(45deg);
 }
 
@@ -229,12 +247,16 @@ onBeforeUnmount(() => {
 }
 
 .icona:focus-visible {
-  outline: 1px solid var(--color-3);
+  outline: none;
+}
+
+.icona:focus-visible :deep(svg) {
+  opacity: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .icona:hover {
-    opacity: 0.7;
+  .icona:hover :deep(svg) {
+    opacity: 1;
   }
 }
 
@@ -243,7 +265,8 @@ onBeforeUnmount(() => {
   .sfuma-leave-active,
   .voce,
   .aperto .voce,
-  .apri :deep(svg) {
+  .apri :deep(svg),
+  .icona :deep(svg) {
     transition: none;
   }
 }

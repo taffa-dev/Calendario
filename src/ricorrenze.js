@@ -18,7 +18,7 @@ const FESTE_FISSE = {
 };
 
 // Domenica di Pasqua (algoritmo di Meeus/Jones/Butcher, calendario gregoriano)
-function pasqua(anno) {
+export function pasqua(anno) {
   const a = anno % 19, b = Math.floor(anno / 100), c = anno % 100;
   const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
   const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;

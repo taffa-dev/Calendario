@@ -17,8 +17,24 @@
       try { salvato = localStorage.getItem('color-theme'); } catch (e) { }
       var scuro = salvato ? salvato === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (scuro) document.documentElement.setAttribute('color-theme', 'dark');
-      // Con una scelta salvata, anche le barre del telefono seguono quella e non il sistema
-      if (salvato) document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.content = scuro ? '#230505' : '#fff8ec'; });
+      // Pasqua (dal lunedì santo a Pasquetta): colori dei ciliegi. Calcolo come in src/stagione.js e
+      // src/ricorrenze.js; in sviluppo segue ?data=
+      var oggi = new Date();
+      var simulata = '%MODE%' === 'development' && new URLSearchParams(location.search).get('data');
+      if (simulata && !isNaN(new Date(simulata + 'T12:00'))) oggi = new Date(simulata + 'T12:00');
+      var anno = oggi.getFullYear(), a = anno % 19, b = Math.floor(anno / 100), c = anno % 100;
+      var d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+      var h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+      var m = Math.floor((a + 11 * h + 22 * l) / 451), n = h + l - 7 * m + 114;
+      var giorni = Math.round((new Date(anno, oggi.getMonth(), oggi.getDate(), 12) - new Date(anno, Math.floor(n / 31) - 1, n % 31 + 1, 12)) / 86400000);
+      var pasqua = giorni >= -6 && giorni <= 1;
+      if (pasqua) document.documentElement.setAttribute('stagione', 'pasqua');
+      // Barre del telefono: con una scelta salvata seguono quella e non il sistema
+      var chiaro = pasqua ? '#fcf0f2' : '#fff8ec', buio = pasqua ? '#24121d' : '#230505';
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+        var perScuro = salvato ? scuro : meta.media.indexOf('dark') >= 0;
+        meta.content = perScuro ? buio : chiaro;
+      });
     })();
   </script>
 </head>

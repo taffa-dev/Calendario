@@ -14,13 +14,16 @@ export function cambiaTema() {
   } else {
     radice.removeAttribute(CHIAVE);
   }
-  // Barre del telefono (e dell'app installata) dello stesso colore dello sfondo
-  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
-    meta.content = tema.value === 'dark' ? '#230505' : '#fff8ec';
-  }
+  aggiornaBarre();
   try {
     localStorage.setItem(CHIAVE, tema.value);
   } catch {
     // Archiviazione bloccata (navigazione privata): il tema vale solo per questa visita
   }
+}
+
+// Barre del telefono dello stesso colore dello sfondo (che dipende da tema e stagione)
+export function aggiornaBarre() {
+  const sfondo = getComputedStyle(radice).getPropertyValue('--color-bg').trim();
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) meta.content = sfondo;
 }

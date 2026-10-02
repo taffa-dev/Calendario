@@ -14,6 +14,26 @@
   --color-3: #c37f63;
 }
 
+/* Pasqua (src/stagione.js): ciliegi in fiore. Di giorno carta rosata e rosa dei petali,
+   di notte cielo color prugna e petali scuri, col bordo argentato dalla luna */
+:root[stagione="pasqua"] {
+  --color-bg: #fcf0f2;
+  --color-1: #d0607c;
+  --color-2: #8a2f4c;
+  --color-3: #3d2530;
+  --petalo-base: #fbd3de;
+  --petalo-punta: #dc6f8e;
+}
+
+:root[stagione="pasqua"][color-theme="dark"] {
+  --color-bg: #24121d;
+  --color-1: #f19bb3;
+  --color-2: #d4718f;
+  --color-3: #e9c6d1;
+  --petalo-base: #2e1826;
+  --petalo-punta: #a29cba;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --cambio-tema: 0s;
