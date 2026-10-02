@@ -5,8 +5,18 @@ const esc = (testo) => String(testo ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&
 
 const SFONDO = { light: '#fff8ec', dark: '#230505' };
 
+const CALENDARIO = 'https://taffa-dev.github.io/Calendario/';
+
+// Freccia "indietro" dello stesso Icona.vue di Calendario e Pills (contorno sottile, 1em × 1em)
+const FRECCIA = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+
+// Barra in alto con la via del ritorno al Calendario: sempre visibile, in ogni pagina pubblica
+const barra = `<nav class="barra" aria-label="Navigazione">
+  <a class="indietro" href="${CALENDARIO}">${FRECCIA}<span>Calendario</span></a>
+</nav>`;
+
 // tema: 'light' o 'dark' se scelto (arriva dal Calendario, poi resta nel cookie), altrimenti segue il sistema
-function pagina(titolo, corpo, { turnstile = false, tema = '' } = {}) {
+function pagina(titolo, corpo, { turnstile = false, tema = '', ritorno = true } = {}) {
   const coloreBarre = tema
     ? `<meta name="theme-color" content="${SFONDO[tema]}">`
     : `<meta name="theme-color" content="${SFONDO.light}" media="(prefers-color-scheme: light)">
@@ -24,33 +34,49 @@ function pagina(titolo, corpo, { turnstile = false, tema = '' } = {}) {
   ${turnstile ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : ''}
 </head>
 <body>
+${ritorno ? barra : ''}
 ${corpo}
 </body>
 </html>`;
 }
 
-const CALENDARIO = 'https://taffa-dev.github.io/Calendario/';
+const MAX_TESTO = 300;
 
-export function paginaModulo({ chiaveTurnstile, errore = '', valori = {}, tema }) {
+// errore: { testo, campo? }. Con il campo ('testo' o 'iniziali') il messaggio sta sotto quel campo,
+// che viene segnato e riceve il focus; senza (limiti, verifica anti-robot) sta in cima
+export function paginaModulo({ chiaveTurnstile, errore = null, valori = {}, tema }) {
+  const sulCampo = (campo) => errore?.campo === campo;
+  const attributiErrore = (campo) => sulCampo(campo) ? ` aria-invalid="true" aria-describedby="errore-${campo}" autofocus` : '';
+  const messaggio = (campo) => sulCampo(campo) ? `<p class="errore-campo" id="errore-${campo}">${esc(errore.testo)}</p>` : '';
+  const lunghezza = [...String(valori.testo ?? '')].length;
   return pagina('Proponi una frase', `<main class="foglio">
   <h1>Proponi una frase</h1>
-  <p class="sottotitolo">Una frase celebre di un collega, per il <a href="${CALENDARIO}">Calendario</a>.</p>
-  ${errore ? `<p class="errore" role="alert">${esc(errore)}</p>` : ''}
+  <p class="sottotitolo">Una frase celebre di un collega, per il Calendario. Le leggiamo tutte prima di pubblicarle.</p>
+  ${errore && !errore.campo ? `<p class="errore" role="alert">${esc(errore.testo)}</p>` : ''}
   <form method="post" action="/">
-    <label for="testo">La frase</label>
-    <textarea id="testo" name="testo" rows="4" maxlength="300" required>${esc(valori.testo)}</textarea>
+    <div class="campo">
+      <label for="testo">La frase</label>
+      <textarea id="testo" name="testo" rows="4" maxlength="${MAX_TESTO}" required${attributiErrore('testo')}>${esc(valori.testo)}</textarea>
+      ${messaggio('testo')}
+      <p class="nota" id="conta" aria-hidden="true">${lunghezza ? `${lunghezza} / ${MAX_TESTO}` : `Fino a ${MAX_TESTO} caratteri`}</p>
+    </div>
 
-    <label for="iniziali">Iniziali di chi l'ha detta</label>
-    <input id="iniziali" name="iniziali" maxlength="12" autocomplete="off" placeholder="A.T." value="${esc(valori.iniziali)}">
-    <label class="spunta"><input type="checkbox" id="anonimo" name="anonimo" ${valori.anonimo ? 'checked' : ''}> Anonimo</label>
+    <div class="campo">
+      <label for="iniziali">Iniziali di chi l'ha detta</label>
+      <input id="iniziali" name="iniziali" maxlength="12" autocomplete="off" placeholder="A.T." value="${esc(valori.iniziali)}"${attributiErrore('iniziali')}>
+      ${messaggio('iniziali')}
+      <label class="spunta"><input type="checkbox" id="anonimo" name="anonimo" ${valori.anonimo ? 'checked' : ''}> Anonimo</label>
+    </div>
 
     <!-- Trappola per i programmi automatici: le persone non la vedono -->
     <div class="nascosto" aria-hidden="true">
       <label for="sito">Sito</label><input id="sito" name="sito" tabindex="-1" autocomplete="off">
     </div>
 
-    <div class="cf-turnstile" data-sitekey="${esc(chiaveTurnstile)}" data-language="it" data-theme="${tema || 'auto'}"></div>
-    <button type="submit">Invia</button>
+    <!-- Invia resta spento finché la verifica non è passata (lo accende modulo.js; senza JavaScript è sempre acceso) -->
+    <div class="cf-turnstile" data-sitekey="${esc(chiaveTurnstile)}" data-language="it" data-theme="${tema || 'auto'}"
+      data-callback="verificaPassata" data-expired-callback="verificaScaduta" data-error-callback="verificaGuasta"></div>
+    <button type="submit" class="principale" id="invia">Invia</button>
   </form>
 </main>`, { turnstile: true, tema });
 }
@@ -58,8 +84,11 @@ export function paginaModulo({ chiaveTurnstile, errore = '', valori = {}, tema }
 export function paginaGrazie({ tema } = {}) {
   return pagina('Grazie', `<main class="foglio">
   <h1>Grazie!</h1>
-  <p>La frase è arrivata. Se passa la verifica, prima o poi comparirà nel <a href="${CALENDARIO}">Calendario</a>.</p>
-  <p><a href="/">Proponine un'altra</a></p>
+  <p class="sottotitolo">La frase è arrivata. Se passa la verifica, prima o poi comparirà nel Calendario.</p>
+  <div class="azioni">
+    <a class="pulsante principale" href="${CALENDARIO}">Torna al Calendario</a>
+    <a class="pulsante secondario" href="/">Proponine un'altra</a>
+  </div>
 </main>`, { tema });
 }
 
@@ -121,7 +150,7 @@ export function paginaAdmin({ proposte, email, repo, messaggio = '', tema }) {
   const approvate = proposte.filter((p) => p.stato === 'approvata').length;
   return pagina('Proposte', `<main class="pannello">
   <h1>Proposte</h1>
-  <p class="sottotitolo">${esc(email)} · <a href="${CALENDARIO}">Calendario</a></p>
+  <p class="sottotitolo">${esc(email)}</p>
   ${messaggio ? `<p class="avviso" role="status">${esc(messaggio)}</p>` : ''}
   <form method="post" action="/admin/pubblica" class="pubblica">
     <button ${approvate ? '' : 'disabled'}>Pubblica ${approvate === 1 ? '1 frase approvata' : `${approvate} frasi approvate`}</button>

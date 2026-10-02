@@ -13,6 +13,9 @@ Raspberry Pi `taffa-pi`, dietro il tunnel Cloudflare condiviso `taffa-dev-tunnel
   si scarta. **Pubblica** fa un unico commit di `src/frasi.json` nel repo: la GitHub Action
   ricalcola il programma e ripubblica il sito. Le date si scelgono col calendario di sistema,
   ognuna "ogni anno" (diventa `MM-GG`) o "una volta" (`AAAA-MM-GG`).
+- In ogni pagina pubblica, in alto a sinistra, "‹ Calendario" per tornare indietro. Invia resta
+  spento ("Attendi la verifica…") finché Turnstile non ha finito; gli errori di frase e iniziali
+  stanno sotto il campo. Colori dei pulsanti con contrasto AA in entrambi i temi (`--pulsante*`).
 - Tema: quello del Calendario, che lo passa nel link (`?tema=dark|light`); il cookie `tema` lo
   ricorda (anche per il pannello). Senza, segue il sistema.
 

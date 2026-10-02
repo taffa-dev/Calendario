@@ -7,6 +7,35 @@ if (anonimo && iniziali) {
   aggiorna();
 }
 
+// Caratteri usati della frase (il limite lo impone già maxlength)
+const testo = document.getElementById('testo');
+const conta = document.getElementById('conta');
+if (testo && conta) {
+  const aggiorna = () => {
+    const usati = [...testo.value].length;
+    conta.textContent = usati ? `${usati} / ${testo.maxLength}` : `Fino a ${testo.maxLength} caratteri`;
+    conta.classList.toggle('al-limite', usati >= testo.maxLength * 0.9);
+  };
+  testo.addEventListener('input', aggiorna);
+  aggiorna();
+}
+
+// Invia si accende quando la verifica anti-robot è passata (Turnstile chiama queste funzioni per nome).
+// Se Turnstile non si carica o si guasta, Invia si riaccende: sarà il server a spiegare cosa non va.
+const invia = document.getElementById('invia');
+if (invia && document.querySelector('.cf-turnstile')) {
+  const pronto = () => document.querySelector('[name="cf-turnstile-response"]')?.value;
+  const accendi = (acceso) => {
+    invia.disabled = !acceso;
+    invia.textContent = acceso ? 'Invia' : 'Attendi la verifica…';
+  };
+  window.verificaPassata = () => accendi(true);
+  window.verificaScaduta = () => accendi(false);
+  window.verificaGuasta = () => accendi(true);
+  accendi(Boolean(pronto()));
+  setTimeout(() => { if (!window.turnstile) accendi(true); }, 8000);
+}
+
 // Pannello: una riga di data in più (copia vuota dell'ultima) o in meno (l'ultima rimasta si svuota soltanto)
 document.addEventListener('click', (evento) => {
   const date = evento.target.closest('.date');

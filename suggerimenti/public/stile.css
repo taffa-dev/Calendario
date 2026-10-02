@@ -3,12 +3,16 @@
 @font-face { font-family: 'Abhaya Libre'; font-weight: 700; font-display: swap; src: url(/font/abhaya-libre-700-latin.woff2) format('woff2'); }
 @font-face { font-family: 'Abhaya Libre'; font-weight: 800; font-display: swap; src: url(/font/abhaya-libre-800-latin.woff2) format('woff2'); }
 
+/* --pulsante*: l'azione principale, con testo ad almeno 4,5:1 di contrasto (WCAG AA) in entrambi i temi */
 :root {
   --color-bg: #fff8ec;
   --color-1: #B54A4A;
   --color-2: #5B0000;
   --color-3: #280000;
   --campo: #fffdf8;
+  --pulsante: #5B0000;
+  --pulsante-sopra: #9c3434;
+  --pulsante-testo: #fff8ec;
   color-scheme: light;
 }
 
@@ -18,6 +22,9 @@
   --color-2: #b33a3a;
   --color-3: #c37f63;
   --campo: #2d0a0a;
+  --pulsante: #d17a32;
+  --pulsante-sopra: #e3955a;
+  --pulsante-testo: #230505;
   color-scheme: dark;
 }
 
@@ -28,6 +35,9 @@
     --color-2: #b33a3a;
     --color-3: #c37f63;
     --campo: #2d0a0a;
+    --pulsante: #d17a32;
+    --pulsante-sopra: #e3955a;
+    --pulsante-testo: #230505;
     color-scheme: dark;
   }
 }
@@ -40,14 +50,45 @@ html, body {
   font-size: 1.1rem;
 }
 
+/* Ritorno al Calendario in alto a sinistra, dove nel Calendario ci sono le azioni:
+   freccia e parola, area da toccare di 48px */
+.barra {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+}
+
+.indietro {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 0.5rem 0.875rem 0.5rem 0.6rem;
+  color: var(--color-1);
+  font-weight: 700;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.indietro svg { font-size: 1.4rem; flex: none; }
+.indietro:focus-visible { outline: 2px solid var(--color-1); outline-offset: -4px; border-radius: 6px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .indietro:hover span { text-decoration: underline; }
+}
+
 main {
   box-sizing: border-box;
   margin: 0 auto;
-  padding: calc(2rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
+  padding: 1rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
 }
 
-.foglio { max-width: 30rem; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
+/* In alto, non centrato: con la tastiera aperta la pagina non salta */
+.foglio { max-width: 30rem; }
 .pannello { max-width: 46rem; }
+
+@media (min-height: 700px) and (min-width: 600px) {
+  .foglio { padding-top: 8vh; }
+}
 
 h1 {
   margin: 0;
@@ -64,8 +105,10 @@ a { color: var(--color-1); }
 code { font-size: 0.9em; }
 
 form { display: flex; flex-direction: column; gap: 0.4rem; }
+.campo { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.8rem; }
 label { font-weight: 700; }
-.spunta { font-weight: 400; display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.6rem; }
+.spunta { font-weight: 400; display: flex; gap: 0.5rem; align-items: center; min-height: 44px; align-self: flex-start; cursor: pointer; }
+.spunta input { width: 1.2rem; height: 1.2rem; margin: 0; accent-color: var(--pulsante); cursor: pointer; }
 
 textarea, input:not([type=checkbox]), select {
   font: inherit;
@@ -76,25 +119,38 @@ textarea, input:not([type=checkbox]), select {
   padding: 0.5rem 0.6rem;
 }
 
-textarea { resize: vertical; margin-bottom: 0.6rem; }
+::placeholder { color: color-mix(in srgb, var(--color-3) 70%, var(--campo)); opacity: 1; }
+textarea { resize: vertical; }
 input:disabled { opacity: 0.4; }
 textarea:focus, input:focus, select:focus { outline: 2px solid var(--color-1); outline-offset: 1px; }
 
-button {
+.nota { margin: 0; font-size: 0.9rem; opacity: 0.75; text-align: right; }
+.nota.al-limite { opacity: 1; color: var(--color-1); font-weight: 700; }
+
+[aria-invalid="true"] { border-color: var(--color-1) !important; border-width: 2px !important; }
+.errore-campo { margin: 0; color: var(--color-1); font-weight: 700; }
+
+button, .pulsante {
   font: inherit;
   font-weight: 700;
-  color: var(--color-bg);
-  background: var(--color-2);
+  color: var(--pulsante-testo);
+  background: var(--pulsante);
   border: none;
   border-radius: 4px;
   padding: 0.5rem 1.1rem;
   cursor: pointer;
   align-self: flex-start;
+  text-decoration: none;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
-button:disabled { opacity: 0.4; cursor: default; }
+/* L'azione principale delle pagine pubbliche: grande, e a tutta larghezza sul telefono */
+.principale { min-height: 48px; padding: 0.7rem 2rem; font-size: 1.15rem; }
 
-button.secondario {
+button:disabled { opacity: 0.5; cursor: default; }
+
+button.secondario, .pulsante.secondario {
   color: var(--color-1);
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--color-1) 50%, transparent);
@@ -102,14 +158,24 @@ button.secondario {
   font-weight: 400;
 }
 
+.pulsante.secondario { min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1.4rem; }
+
+.azioni { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.azioni .pulsante { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+
 @media (hover: hover) and (pointer: fine) {
-  button:not(:disabled):hover { background: var(--color-1); }
-  button.secondario:hover { color: var(--color-bg); }
+  button:not(:disabled):hover, .pulsante:hover { background: var(--pulsante-sopra); }
+  button.secondario:not(:disabled):hover, .pulsante.secondario:hover { color: var(--pulsante-testo); background: var(--pulsante-sopra); border-color: var(--pulsante-sopra); }
+}
+
+@media (max-width: 600px) {
+  .principale, .azioni .pulsante { align-self: stretch; width: 100%; }
+  .azioni { flex-direction: column; align-items: stretch; }
 }
 
 .cf-turnstile { margin: 0.4rem 0 0.6rem; min-height: 65px; }
 .nascosto { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-.errore, .avviso { padding: 0.5rem 0.7rem; border-left: 3px solid var(--color-1); background: var(--campo); }
+.errore, .avviso { margin: 0 0 1rem; padding: 0.5rem 0.7rem; border-left: 3px solid var(--color-1); background: var(--campo); }
 
 /* Pannello */
 .pubblica { margin-bottom: 0.4rem; }

@@ -144,16 +144,16 @@ export function creaServer(config) {
   async function proponi(richiesta, risposta, tema) {
     const campi = await leggiCorpo(richiesta);
     const valori = { testo: campi.testo, iniziali: campi.iniziali, anonimo: Boolean(campi.anonimo) };
-    const errore = (testo, stato = 400) => invia(risposta, stato, paginaModulo({ chiaveTurnstile: config.turnstile.chiave, errore: testo, valori, tema }));
+    const errore = (testo, stato = 400, campo = null) => invia(risposta, stato, paginaModulo({ chiaveTurnstile: config.turnstile.chiave, errore: { testo, campo }, valori, tema }));
 
     // Trappola riempita: si finge che sia andata bene, senza salvare nulla
     if (campi.sito) return vaiA(risposta, '/grazie');
 
     const testo = pulisciTesto(campi.testo);
-    if (testo.length < 3 || testo.length > 300) return errore('La frase deve essere tra 3 e 300 caratteri.');
+    if (testo.length < 3 || testo.length > 300) return errore('La frase deve essere tra 3 e 300 caratteri.', 400, 'testo');
     const autore = valori.anonimo ? 'Anonimo' : pulisciIniziali(campi.iniziali);
-    if (!autore) return errore('Scrivi le iniziali di chi l\'ha detta, oppure spunta "Anonimo".');
-    if (autore.length > 12 || !/^[\p{L}.' ]+$/u.test(autore)) return errore('Le iniziali possono contenere solo lettere e punti.');
+    if (!autore) return errore('Scrivi le iniziali di chi l\'ha detta, oppure spunta "Anonimo".', 400, 'iniziali');
+    if (autore.length > 12 || !/^[\p{L}.' ]+$/u.test(autore)) return errore('Le iniziali possono contenere solo lettere e punti.', 400, 'iniziali');
 
     const ip = richiesta.headers['cf-connecting-ip'] ?? richiesta.socket.remoteAddress ?? '';
     const impronta = createHash('sha256').update(config.sale + ip).digest('hex');
