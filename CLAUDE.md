@@ -16,7 +16,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `src/oggi.js` — data di oggi (`?data=` in sviluppo) e cambio giorno a mezzanotte / al ritorno sulla scheda.
 - `src/stagione.js` — tema di Pasqua (dal lunedì santo a Pasquetta, come in Pills): `stagione="pasqua"` su `<html>`, colori in `tema.css` (chiaro: carta rosata; scuro: prugna, petali scuri col bordo argentato dalla luna) e `Petali` (piccoli dietro il foglio, pochi grandi e sfocati davanti, "vicini alla telecamera"; il vento va verso destra, al contrario di Pills). Lo script in `index.html` lo applica prima del primo disegno (Pasqua ricalcolata lì: tenerla allineata). L'utente ha scartato i rami di ciliegio, sia disegnati sia come ombra.
 - `src/tema.js` + script in `index.html` — tema chiaro/scuro; `src/tema.css` colori e `--cambio-tema` (2s); `src/font.css` + `src/assets/fonts/` Abhaya Libre in casa (stessi file di Google Fonts: latin e latin-ext, pesi 400/700/800).
-- `src/components/` — `DataDelGiorno`, `Frase`, `Icona` (tracciati di Font Awesome Free copiati, CC BY 4.0, stesse misure del pacchetto: 1em × 1.25em).
+- `src/components/` — `DataDelGiorno`, `Frase`, `Icona` (icone a contorno sottile nello stile di Lucide, ISC: griglia 24×24, tratto 2, 1em × 1em; sono le icone che aveva Pills, l'utente le preferisce alle Font Awesome piene, "meno ingombranti, più eleganti"). `Icona.vue` è **identico in Pills**: se cambia in uno va copiato nell'altro.
 - `public/` — favicon, `icona-192.png` (icona dei segnalibri) e `sw.js`, che serve solo a disinstallare (sotto).
 - `suggerimenti/` — server delle proposte, gira sul Raspberry Pi (vedi `suggerimenti/LEGGIMI.md`).
 
@@ -40,7 +40,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `theme-color` (barre del telefono) segue il tema e la stagione, anche quando lo si cambia col pulsante (`aggiornaBarre()` legge `--color-bg`).
 
 ## Vincoli tecnici
-- Icone in alto gemelle di Pills: `top: calc(0.5rem + env(safe-area-inset-top))` (e così il lato), `padding: 0.35rem`, `font-size: 1rem`, icone `1em`; l'icona a quadratini del Calendario sta dove in Pills c'è il link al Calendario. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
+- Icone in alto identiche a quelle di Pills (stesso `Icona.vue`; colore del testo, opacità 0.55 che sale a 1 con hover/focus e sul quadratino aperto, messa sull'`svg` per non sommarsi a quella del ventaglio): `top: calc(0.5rem + env(safe-area-inset-top))` (e così il lato), `padding: 0.35rem`, `font-size: 1rem`; l'icona a quadratini del Calendario sta dove in Pills c'è il link al Calendario. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
 - **Niente app installabile** (scelta dell'utente: aprire Pills dal Calendario o viceversa apriva il browser interno dell'app). Niente manifest; `public/sw.js` resta solo per chi l'aveva installata: cancella le copie salvate e si disattiva; `main.js` disattiva i service worker rimasti. Non rimettere un service worker che salva copie.
 - `viewport-fit=cover`: sfondo su `html` e `body`, `env(safe-area-inset-*)` per tutto ciò che è fisso ai bordi.
 - Effetti hover solo dentro `@media (hover: hover) and (pointer: fine)`: sui touch screen `:hover` resta attivo dopo il tocco.
