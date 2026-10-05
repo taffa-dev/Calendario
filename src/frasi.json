@@ -38,5 +38,7 @@
   {"testo":"Il numero più chiamato sul mio cellulare personale è quello del mio capo, che tristezza.","autore":"Anonimo"},
   {"testo":"Sto vedendo una cosa chiaramente paranormale.","autore":"A.T."},
   {"testo":"Tutto arrosto.","autore":"M.G."},
-  {"testo":"Facciamo che il giovedì pomeriggio non si lavora.","autore":"S.T.","giorni":["giovedì"],"probabilita":0.5}
+  {"testo":"Facciamo che il giovedì pomeriggio non si lavora.","autore":"S.T.","giorni":["giovedì"],"probabilita":0.5},
+  {"testo":"Se mio nonno avesse avuto tre palle, sarebbe stato un flipper.","autore":"Anonimo"},
+  {"testo":"Queste API crescono come un cancro.","autore":"Anonimo"}
 ]
