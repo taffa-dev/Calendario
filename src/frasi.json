@@ -40,5 +40,9 @@
   {"testo":"Tutto arrosto.","autore":"M.G."},
   {"testo":"Facciamo che il giovedì pomeriggio non si lavora.","autore":"S.T.","giorni":["giovedì"],"probabilita":0.5},
   {"testo":"Se mio nonno avesse avuto tre palle, sarebbe stato un flipper.","autore":"Anonimo"},
-  {"testo":"Queste API crescono come un cancro.","autore":"Anonimo"}
+  {"testo":"Queste API crescono come un cancro.","autore":"Anonimo"},
+  {"testo":"Chi usa un gestionale vuole un gestionale, non una cosa bella.","autore":"M."},
+  {"testo":"Di venerdì pomeriggio dovrebbe essere illegale lavorare.","autore":"E.C.","giorni":["venerdì"],"probabilita":0.25},
+  {"testo":"Questo venerdì è infinito.","autore":"A.T.","giorni":["venerdì"],"probabilita":0.25},
+  {"testo":"Ma la smettete di andare in ufficio il lunedì?","autore":"Anonimo","giorni":["lunedì"],"probabilita":0.25}
 ]
