@@ -10,7 +10,7 @@ Raspberry Pi `taffa-pi`, dietro il tunnel Cloudflare condiviso `taffa-dev-tunnel
   verifica comunque il token firmato di Access (mai l'header con l'email in chiaro) e che l'email
   sia in `ADMIN_EMAIL`: se Access fosse configurato male, il pannello resta chiuso.
   Tre schede in cima: **Proposte · Frasi · Ricorrenze**.
-  - *Proposte*: si corregge testo e autore, si aggiungono le regole (giorni, date, probabilità),
+  - *Proposte*: si corregge testo e autore, si aggiungono le regole (giorni, date),
     si approva o si scarta. Niente "Salva": ogni scheda nuova o approvata si salva da sola
     (0,7 s dopo l'ultima digitazione, subito a campo finito; accanto ai bottoni compare
     "Salvato" o l'errore del server, e quel che si sta scrivendo non si perde). Il salvataggio è

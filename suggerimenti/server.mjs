@@ -79,7 +79,7 @@ export function dateDalModulo(date, ripeti) {
 }
 
 // Regole del pannello → regole di frasi.json; restituisce { regole } o { errore }
-export function leggiRegole({ giorni, date, probabilita }) {
+export function leggiRegole({ giorni, date }) {
   const regole = {};
   const g = elenco(giorni);
   if (g.length) {
@@ -92,13 +92,6 @@ export function leggiRegole({ giorni, date, probabilita }) {
     const sbagliate = d.filter((x) => !DATA.test(x) || !dataEsiste(x));
     if (sbagliate.length) return { errore: `Data non valida (MM-GG o AAAA-MM-GG): ${sbagliate.join(', ')}` };
     regole.date = d;
-  }
-  const p = spazi(probabilita);
-  if (p) {
-    const n = Number(p.replace(',', '.'));
-    if (!(n > 0 && n <= 1)) return { errore: 'La probabilità va da 0 a 1 (vuota = sempre)' };
-    if (!regole.giorni && !regole.date) return { errore: 'La probabilità serve solo con giorni o date' };
-    if (n < 1) regole.probabilita = n;
   }
   return { regole };
 }
@@ -165,7 +158,7 @@ export function leggiFrasiPannello(voci, vecchie = []) {
     if (!testoInvariato && (lettere.length < 3 || lettere.length > 300)) return { errore: dove + 'la frase deve essere tra 3 e 300 caratteri.', riga };
     if (!autore) return { errore: dove + "manca l'autore.", riga };
     if (!autoreInvariato && [...autore].length > MAX_AUTORE) return { errore: dove + `l'autore è più lungo di ${MAX_AUTORE} caratteri.`, riga };
-    const { regole, errore } = leggiRegole({ giorni: v.giorni, probabilita: v.probabilita, date: dateDalModulo(v.data, v.ripeti) });
+    const { regole, errore } = leggiRegole({ giorni: v.giorni, date: dateDalModulo(v.data, v.ripeti) });
     if (errore) return { errore: dove + errore, riga };
     if (viste.has(`${testo}|${autore}`)) return { errore: dove + "c'è già una frase uguale (stesso testo e stesso autore).", riga };
     viste.add(`${testo}|${autore}`);

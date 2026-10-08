@@ -82,7 +82,7 @@ test('frasi aggiunte: passato e oggi restano, le nuove escono entro il giro', ()
   assert.ok(visteDopo.includes('Nuova uno.') && visteDopo.includes('Nuova due.'));
 });
 
-test('speciali: giovedì circa metà, sempre nei giorni senza probabilità', () => {
+test('speciali: giovedì circa metà, le date sempre', () => {
   const frasi = [...frasiVere, { testo: 'Natale!', autore: 'Z.', date: ['12-25'] }];
   const prova = cartellaDiProva(frasi);
   const programma = prova.genera('2026-10-01');
@@ -92,7 +92,25 @@ test('speciali: giovedì circa metà, sempre nei giorni senza probabilità', () 
     const f = getFrase(frasi, programma, d);
     if (iso(d).endsWith('12-25')) assert.equal(f.testo, 'Natale!');
     else assert.notEqual(f.testo, 'Natale!');
-    if (d.getDay() === 4) { giovedi++; if (f.giorni) speciale++; } else assert.ok(!f.giorni);
+    if (d.getDay() === 4) { giovedi++; if (f.giorni) speciale++; } else if (f.giorni) assert.ok(!f.giorni.includes('giovedì'));
   }
   assert.ok(Math.abs(speciale / giovedi - 0.5) < 0.07, `${speciale}/${giovedi}`);
+});
+
+test('speciali: con N frasi per un giorno, ognuna ha 1/(N+1) e il mazzo l\'ultima fetta', () => {
+  const frasi = [...frasiVere.filter((f) => !f.giorni?.includes('venerdì')),
+    { testo: 'Venerdì uno.', autore: 'V.', giorni: ['venerdì'] },
+    { testo: 'Venerdì due.', autore: 'W.', giorni: ['venerdì'] }];
+  const programma = cartellaDiProva(frasi).genera('2026-10-01');
+  let venerdi = 0, uno = 0, due = 0;
+  for (let i = 0; i < 3650; i++) {
+    const d = sposta('2026-10-02', i);
+    if (d.getDay() !== 5) continue;
+    venerdi++;
+    const t = getFrase(frasi, programma, d).testo;
+    if (t === 'Venerdì uno.') uno++;
+    if (t === 'Venerdì due.') due++;
+  }
+  assert.ok(Math.abs(uno / venerdi - 1 / 3) < 0.07, `uno ${uno}/${venerdi}`);
+  assert.ok(Math.abs(due / venerdi - 1 / 3) < 0.07, `due ${due}/${venerdi}`);
 });

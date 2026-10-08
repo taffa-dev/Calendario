@@ -95,11 +95,10 @@ test('pulizia: iniziali, virgolette, regole', () => {
   assert.equal(pulisciIniziali(' m. g. '), 'M.G.');
   assert.equal(pulisciIniziali('A.D.G.'), 'A.D.G.');
   assert.equal(pulisciTesto('  «Che   fastidio.»  '), 'Che fastidio.');
-  assert.deepEqual(leggiRegole({ giorni: 'Giovedì', date: '', probabilita: '0,5' }), { regole: { giorni: ['giovedì'], probabilita: 0.5 } });
-  assert.deepEqual(leggiRegole({ giorni: '', date: '12-25', probabilita: '' }), { regole: { date: ['12-25'] } });
+  assert.deepEqual(leggiRegole({ giorni: 'Giovedì', date: '' }), { regole: { giorni: ['giovedì'] } });
+  assert.deepEqual(leggiRegole({ giorni: '', date: '12-25' }), { regole: { date: ['12-25'] } });
   assert.ok(leggiRegole({ giorni: 'giovedi', date: '13-01' }).errore);
   assert.ok(leggiRegole({ giorni: 'festa' }).errore);
-  assert.ok(leggiRegole({ probabilita: '0.5' }).errore);
   // Selettori di data: ogni anno → MM-GG, solo quell'anno → AAAA-MM-GG, vuote e doppie via
   assert.equal(dateDalModulo(['2026-12-25', '', '2026-10-31', '2027-12-25'], ['anno', 'anno', 'una', 'anno']), '12-25, 2026-10-31');
   assert.equal(dateDalModulo('', 'anno'), '');
@@ -177,11 +176,11 @@ test('pannello: correggi, approva, pubblica con un commit di frasi.json', async 
     const tre = s.archivio.aggiungi({ testo: 'Spam.', autore: 'Y' });
 
     // Data sbagliata: non si salva
-    await s.invia(`/admin/proposte/${uno}`, { azione: 'approva', testo: 'Facciamo merenda?', autore: 'A.B.', giorni: '', date: '31-12', probabilita: '' }, admin);
+    await s.invia(`/admin/proposte/${uno}`, { azione: 'approva', testo: 'Facciamo merenda?', autore: 'A.B.', giorni: '', date: '31-12' }, admin);
     assert.equal(s.archivio.proposta(uno).stato, 'nuova');
 
-    await s.invia(`/admin/proposte/${uno}`, { azione: 'approva', testo: 'Facciamo merenda?', autore: 'A.B.', giorni: 'venerdì', date: '', probabilita: '0.3' }, admin);
-    await s.invia(`/admin/proposte/${due}`, { azione: 'approva', testo: 'Assurdo.', autore: 'N.S.', giorni: '', date: '', probabilita: '' }, admin);
+    await s.invia(`/admin/proposte/${uno}`, { azione: 'approva', testo: 'Facciamo merenda?', autore: 'A.B.', giorni: 'venerdì', date: '' }, admin);
+    await s.invia(`/admin/proposte/${due}`, { azione: 'approva', testo: 'Assurdo.', autore: 'N.S.', giorni: '', date: '' }, admin);
     await s.invia(`/admin/proposte/${tre}`, { azione: 'scarta' }, admin);
     assert.equal(s.archivio.proposta(uno).stato, 'approvata');
 
@@ -203,9 +202,9 @@ test('pannello: correggi, approva, pubblica con un commit di frasi.json', async 
     assert.equal(r.status, 303);
     assert.deepEqual(finti.file[FRASI].voci, [
       { testo: 'Assurdo.', autore: 'N.S.' },
-      { testo: 'Facciamo merenda?', autore: 'A.B.', giorni: ['venerdì'], probabilita: 0.3 }
+      { testo: 'Facciamo merenda?', autore: 'A.B.', giorni: ['venerdì'] }
     ]);
-    assert.equal(finti.file[FRASI].testoFile, '[\n  {"testo":"Assurdo.","autore":"N.S."},\n  {"testo":"Facciamo merenda?","autore":"A.B.","giorni":["venerdì"],"probabilita":0.3}\n]\n');
+    assert.equal(finti.file[FRASI].testoFile, '[\n  {"testo":"Assurdo.","autore":"N.S."},\n  {"testo":"Facciamo merenda?","autore":"A.B.","giorni":["venerdì"]}\n]\n');
     assert.match(finti.file[FRASI].messaggio, /Facciamo merenda\?/);
     assert.equal(s.archivio.proposta(uno).stato, 'pubblicata');
     assert.equal(s.archivio.proposta(uno).commit_sha, `commit-${finti.file[FRASI].commit}`);
@@ -254,11 +253,11 @@ test('proposte: salvataggio automatico via fetch, risposta JSON; senza intestazi
     assert.doesNotMatch(pagina, /value="salva"/);
 
     const salva = (campi) => s.invia(`/admin/proposte/${id}`, { azione: 'salva', ...campi }, { ...admin, 'x-richiesta': 'fetch' });
-    let r = await salva({ testo: 'Facciamo merenda?', autore: 'A.B.', giorni: 'venerdì', probabilita: '0.3' });
+    let r = await salva({ testo: 'Facciamo merenda?', autore: 'A.B.', giorni: 'venerdì' });
     assert.equal(r.status, 200);
     assert.match(r.headers.get('content-type'), /json/);
     assert.deepEqual(await r.json(), { ok: true });
-    assert.deepEqual(s.archivio.proposta(id).regole, { giorni: ['venerdì'], probabilita: 0.3 });
+    assert.deepEqual(s.archivio.proposta(id).regole, { giorni: ['venerdì'] });
 
     // Input non valido: errore col messaggio del server, e quel che era salvato resta
     r = await salva({ testo: 'Altro testo', autore: 'A.B.', giorni: 'festa' });
@@ -327,7 +326,7 @@ test('Frasi e Ricorrenze: solo per chi entra in /admin, e solo dalla stessa orig
 
 test('Frasi e Ricorrenze: le pagine mostrano le voci del repo, con le schede', async () => {
   riparti();
-  finti.file[FRASI].voci = [{ testo: 'Assurdo.', autore: 'N.S.' }, { testo: 'Giovedì <b>.', autore: 'M.M.', giorni: ['giovedì'], probabilita: 0.5, date: ['12-25'] }];
+  finti.file[FRASI].voci = [{ testo: 'Assurdo.', autore: 'N.S.' }, { testo: 'Giovedì <b>.', autore: 'M.M.', giorni: ['giovedì'], date: ['12-25'] }];
   finti.file[RICORRENZE].voci = [{ data: '12-25', nome: 'Natale di casa' }, { data: '2026-03-02', nome: 'Compleanno di M.G.' }];
   const s = await avvia();
   const admin = await adminToken();
@@ -451,17 +450,17 @@ test('Frasi: Pubblica modifica, aggiunge, toglie in un solo commit e non riordin
   finti.file[FRASI].voci = [
     { testo: 'Prima.', autore: 'A.A.' },
     { testo: 'Seconda.', autore: 'B.B.' },
-    { testo: 'Terza.', autore: 'C.C.', giorni: ['giovedì'], probabilita: 0.5 },
+    { testo: 'Terza.', autore: 'C.C.', giorni: ['giovedì'] },
     { testo: 'Quarta «tra virgolette»', autore: 'D.D.' }
   ];
   const s = await avvia();
   const admin = await adminToken();
   const file = finti.file[FRASI];
   const pubblica = (voci, sha = file.sha) => inviaJson(s, '/admin/frasi', { sha, voci }, admin);
-  const f = (indice, testo, autore, extra = {}) => ({ indice, testo, autore, giorni: '', probabilita: '', data: [''], ripeti: ['anno'], ...extra });
+  const f = (indice, testo, autore, extra = {}) => ({ indice, testo, autore, giorni: '', data: [''], ripeti: ['anno'], ...extra });
   const invariate = () => [
     f(0, 'Prima.', 'A.A.'), f(1, 'Seconda.', 'B.B.'),
-    f(2, 'Terza.', 'C.C.', { giorni: 'giovedì', probabilita: '0.5' }),
+    f(2, 'Terza.', 'C.C.', { giorni: 'giovedì' }),
     f(3, 'Quarta «tra virgolette»', 'D.D.')
   ];
   try {
@@ -482,7 +481,6 @@ test('Frasi: Pubblica modifica, aggiunge, toglie in un solo commit e non riordin
       [[f(0, 'Prima.', 'x'.repeat(41))], /più lungo di 40/, 0],
       [[f(0, 'Prima.', 'A.A.', { giorni: 'festa' })], /Giorno non valido/, 0],
       [[f(0, 'Prima.', 'A.A.', { data: ['2026-02-30'], ripeti: ['una'] })], /Data non valida/, 0],
-      [[f(0, 'Prima.', 'A.A.', { probabilita: '0.5' })], /probabilità serve solo/, 0],
       [[f(0, 'Prima.', 'A.A.'), f(0, 'Seconda.', 'B.B.')], /ricarica/, 1],
       [[f(9, 'Prima.', 'A.A.')], /ricarica/, 0]
     ]) {

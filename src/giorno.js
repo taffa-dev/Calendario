@@ -42,16 +42,22 @@ export function creaSceltaDelGiorno(frasi) {
   const mazzo = creaMazzo(frasi.filter((f) => !conRegole(f)).map(chiaveFrase));
   const giorniDelMazzo = [];
 
-  // Speciali: un sorteggio del giorno, indipendente dal mazzo, diviso in fette `probabilita`
-  // (senza `probabilita` la frase esce sempre nei suoi giorni). Prima le frasi legate alla data,
-  // poi quelle legate al giorno della settimana: il 25/12 vince sul giovedì.
+  // Speciali: un sorteggio del giorno, indipendente dal mazzo, diviso in fette. Prima le frasi
+  // legate alla data (escono sempre), poi quelle legate al giorno della settimana: il 25/12 vince
+  // sul giovedì. Le frasi di un giorno della settimana sono N: ognuna ha 1/(N+1), l'ultima
+  // fetta è per il mazzo (una frase di venerdì: metà e metà; due: un terzo ciascuna e un terzo mazzo).
   function speciale(giorno) {
     const data = dataDi(giorno);
     const sorteggio = mescola(`${giorno}#speciali`) / 2 ** 32;
     let soglia = 0;
-    const candidate = [...speciali.filter((f) => perData(f, data)), ...speciali.filter((f) => !perData(f, data) && perGiorno(f, data))];
-    for (const frase of candidate) {
-      soglia += frase.probabilita ?? 1;
+    const dellaData = speciali.filter((f) => perData(f, data));
+    const delGiorno = speciali.filter((f) => !perData(f, data) && perGiorno(f, data));
+    for (const frase of dellaData) {
+      soglia += 1;
+      if (sorteggio < soglia) return chiaveFrase(frase);
+    }
+    for (const frase of delGiorno) {
+      soglia += 1 / (delGiorno.length + 1);
       if (sorteggio < soglia) return chiaveFrase(frase);
     }
     return null;
