@@ -99,6 +99,9 @@ test('pulizia: iniziali, virgolette, regole', () => {
   assert.deepEqual(leggiRegole({ giorni: '', date: '12-25' }), { regole: { date: ['12-25'] } });
   assert.ok(leggiRegole({ giorni: 'giovedi', date: '13-01' }).errore);
   assert.ok(leggiRegole({ giorni: 'festa' }).errore);
+  // Dalle caselle del pannello i giorni arrivano come elenco
+  assert.deepEqual(leggiRegole({ giorni: ['giovedì', 'venerdì'] }), { regole: { giorni: ['giovedì', 'venerdì'] } });
+  assert.ok(leggiRegole({ giorni: ['giovedì', 'festa'] }).errore);
   // Selettori di data: ogni anno → MM-GG, solo quell'anno → AAAA-MM-GG, vuote e doppie via
   assert.equal(dateDalModulo(['2026-12-25', '', '2026-10-31', '2027-12-25'], ['anno', 'anno', 'una', 'anno']), '12-25, 2026-10-31');
   assert.equal(dateDalModulo('', 'anno'), '');
@@ -338,6 +341,8 @@ test('Frasi e Ricorrenze: le pagine mostrano le voci del repo, con le schede', a
     assert.match(frasi, />Assurdo\.<\/textarea>/);
     assert.match(frasi, /Giovedì &lt;b&gt;\./);
     assert.match(frasi, /data-indice="1"/);
+    assert.match(frasi, /name="giorni" value="giovedì" aria-label="giovedì" checked/);
+    assert.doesNotMatch(frasi, /value="venerdì"[^>]* checked/);
     assert.match(frasi, /data-sha="sha-0"/);
     assert.match(frasi, /conta come nuova/);
     assert.match(frasi, /type="date" name="data" value="\d{4}-12-25"/);
