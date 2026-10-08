@@ -53,6 +53,7 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - `viewport-fit=cover`: sfondo su `html` e `body`, `env(safe-area-inset-*)` per tutto ciò che è fisso ai bordi.
 - Effetti hover solo dentro `@media (hover: hover) and (pointer: fine)`: sui touch screen `:hover` resta attivo dopo il tocco.
 - Nessuna risorsa esterna (font e icone sono in casa).
+- Font senza lampo: `index.html` precarica i tre pesi latin, `font.css` usa `font-display: block` e `main.js` monta l'app solo a font caricati (al massimo 1,5s di attesa; lo sfondo è già su `html`/`body`). Prima compariva un istante col font di ripiego e poi tutto si spostava (anche l'impaginazione dei numeri).
 
 ## Sviluppo e verifica
 - `npm run dev`, poi `?data=AAAA-MM-GG` per simulare un giorno (solo in sviluppo). Un giovedì con la frase speciale: `?data=2026-10-01`; ricorrenze e tema di Pasqua: `?data=2027-03-29` (Pasquetta), `?data=2026-12-25`. `?strappo` mostra lo strappo del giorno nuovo a ogni apertura. Il pulsantino in basso è il Vue DevTools, solo in dev.
