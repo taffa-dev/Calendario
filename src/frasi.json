@@ -44,5 +44,7 @@
   {"testo":"Chi usa un gestionale vuole un gestionale, non una cosa bella.","autore":"M."},
   {"testo":"Di venerdì pomeriggio dovrebbe essere illegale lavorare.","autore":"E.C.","giorni":["venerdì"]},
   {"testo":"Questo venerdì è infinito.","autore":"A.T.","giorni":["venerdì"]},
-  {"testo":"Ma la smettete di andare in ufficio il lunedì?","autore":"Anonimo","giorni":["lunedì"]}
+  {"testo":"Ma la smettete di andare in ufficio il lunedì?","autore":"Anonimo","giorni":["lunedì"]},
+  {"testo":"Comunque, raga, peace and love.","autore":"M.G."},
+  {"testo":"Siamo tutti sulla stessa barca che sta affondando, ma noi siamo nelle cantine e loro nell'attico.","autore":"E.C."}
 ]
