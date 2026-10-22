@@ -27,10 +27,6 @@ Calendario: un foglio di calendario con la data di oggi e una frase celebre dei 
 
 Ricerca, analisi, specifiche e revisione con **Opus**; codice con **Sonnet via sub-agent**, a cui si passa una specifica completa (regole sopra + file KB del tema). Una richiesta di analisi o di roadmap non è una richiesta di codice. La regola sta anche nel CLAUDE.md globale dell'utente, ma le sessioni cloud non lo caricano: per questo è ripetuta qui.
 
-## Ruoli dei modelli (regola dell'utente, 12/10/2026)
-
-Ricerca, analisi, specifiche e revisione con **Opus**; codice con **Sonnet via sub-agent**, a cui si passa una specifica completa (regole sopra + file KB del tema). Una richiesta di analisi o di roadmap non è una richiesta di codice. La regola sta anche nel CLAUDE.md globale dell'utente, ma le sessioni cloud non lo caricano: per questo è ripetuta qui.
-
 ## Indice breve (versione completa: docs/kb/INDICE.md)
 
 - `struttura.md`: mappa dei file di `src/` e `suggerimenti/`, cosa è condiviso con Pills
