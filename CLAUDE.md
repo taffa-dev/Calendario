@@ -64,3 +64,8 @@ Progetto gemello di Pills (`../Pills`): vedi anche il suo CLAUDE.md.
 - La pubblicazione la fa la GitHub Action `.github/workflows/pubblica.yml` a ogni push su `master`, ogni lunedì notte e a mano: test, `npm run programma` (con `TZ=Europe/Rome`), commit di `src/programma.json` se cambia, build, ramo `gh-pages`. Dopo un push fare `git pull` prima di lavorare: la Action aggiunge il suo commit. Anche il server dei suggerimenti pubblica così (commit di `src/frasi.json` e `src/ricorrenze.json`).
 - `npm run deploy` (`gh-pages -d dist` dal PC) resta come emergenza; usa il programma così com'è nel repo.
 - Identità git, `GIT_TERMINAL_PROMPT=0`/`timeout`, messaggi in italiano: come in Pills. Commit e deploy solo quando l'utente lo chiede.
+
+## GitHub Actions: crediti finiti (21/10/2026)
+- I crediti Actions dell'account sono finiti e l'utente **non vuole spendere nulla**: i job dei repo privati si fermano in ~3 s ("recent account payments have failed or your spending limit needs to be increased"). Questo repo è pubblico, quindi i minuti sono gratuiti e `pubblica.yml`/`suggerimenti.yml` potrebbero funzionare, **ma non è verificato**: non darlo per scontato, controllare l'esito della Action dopo un push.
+- Se la Action non gira: il sito non si ripubblica, `src/programma.json` non si aggiorna e l'immagine dei suggerimenti non si ricostruisce. Il "Pubblica" del pannello `/admin` fa comunque il commit, ma non succede altro. Piano B: `npm run programma` (con `TZ=Europe/Rome`) e `npm run deploy` dal PC; l'immagine `suggerimenti/` come Kanye (buildx arm64 sul PC, mai sul Pi, `docker save` e copia).
+- Approccio adottato altrove: VideoLibrary ha ridotto i workflow a `workflow_dispatch` e costruisce dal PC (`docs/kb/aggiornamenti.md` di VideoLibrary).
