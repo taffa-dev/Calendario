@@ -145,9 +145,8 @@ function schedaProposta(p, repo) {
     <textarea name="testo" rows="3" maxlength="300" ${modificabile ? '' : 'readonly'}>${esc(p.testo)}</textarea>
     <div class="riga">
       <label>Autore <input name="autore" maxlength="40" value="${esc(p.autore)}" ${modificabile ? '' : 'readonly'}></label>
-      <label>Giorni <input name="giorni" placeholder="giovedì, venerdì" value="${esc((r.giorni ?? []).join(', '))}" ${modificabile ? '' : 'readonly'}></label>
-      <label>Probabilità <input name="probabilita" type="number" min="0" max="1" step="0.05" placeholder="sempre" value="${esc(r.probabilita ?? '')}" ${modificabile ? '' : 'readonly'}></label>
     </div>
+    ${sceltaGiorni(r.giorni, modificabile)}
     <fieldset class="date">
       <legend>Date</legend>
       ${[...(r.date ?? []), ...(modificabile ? [''] : [])].map((d) => rigaData(d, modificabile)).join('\n      ')}
@@ -176,7 +175,7 @@ export function paginaAdmin({ proposte, email, repo, messaggio = '', tema }) {
     <button ${approvate ? '' : 'disabled'}>Pubblica ${approvate === 1 ? '1 frase approvata' : `${approvate} frasi approvate`}</button>
     <p>Le aggiunge a <code>src/frasi.json</code> con un commit: GitHub ricostruisce il sito da solo. Meglio pubblicarne diverse insieme.</p>
   </form>
-  <p class="aiuto">Le modifiche a testo, autore e regole si salvano da sole (accanto ai bottoni compare "Salvato"); Approva salva anche le ultime. Giorni e date: la frase esce solo in quei giorni (ogni anno o una volta sola; le date vuote non contano). Probabilità: quante volte esce nei suoi giorni (vuota = sempre). Senza giorni né date entra nel mazzo normale.</p>
+  <p class="aiuto">Le modifiche a testo, autore e regole si salvano da sole (accanto ai bottoni compare "Salvato"); Approva salva anche le ultime. Giorni e date: la frase esce solo in quei giorni (ogni anno o una volta sola; le date vuote non contano). Con più frasi nello stesso giorno della settimana, ognuna ha la stessa probabilità, e una parte resta al mazzo normale. Senza giorni né date entra nel mazzo normale.</p>
   ${proposte.length ? proposte.map((p) => schedaProposta(p, repo)).join('\n') : '<p>Nessuna proposta, per ora.</p>'}
 </main>`, { tema });
 }
@@ -235,14 +234,25 @@ export function paginaRicorrenze({ voci, sha, errore = '', messaggio = '', email
 function riepilogoRegole(f) {
   const parti = [];
   if (f.giorni?.length) parti.push(f.giorni.join(', '));
-  if (f.probabilita) parti.push(`${Math.round(f.probabilita * 100)}%`);
   if (f.date?.length) parti.push(f.date.length === 1 ? '1 data' : `${f.date.length} date`);
   return parti.join(', ') || 'tutti i giorni';
 }
 
-// Una frase: testo, autore e, in "Regole", giorni, probabilità e date. Senza `indice` è nuova
+// Giorni della settimana a scelta (lunedì per primo): una casella per giorno, a forma di chip.
+// L'input sta dentro il label (niente id: la riga delle frasi nuove viene clonata)
+const GIORNI = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
+const nudo = (t) => t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+function sceltaGiorni(scelti = [], modificabile = true) {
+  const attivi = new Set(scelti.map(nudo));
+  return `<fieldset class="giorni">
+      <legend>Giorni</legend>
+      ${GIORNI.map((g) => `<label class="chip"><input type="checkbox" name="giorni" value="${g}" aria-label="${g}"${attivi.has(nudo(g)) ? ' checked' : ''}${modificabile ? '' : ' disabled'}><span aria-hidden="true">${g.slice(0, 3)}</span></label>`).join('')}
+    </fieldset>`;
+}
+
+// Una frase: testo, autore e, in "Regole", giorni e date. Senza `indice` è nuova
 function voceFrase(f, indice) {
-  const haRegole = Boolean(f.giorni?.length || f.date?.length || f.probabilita);
+  const haRegole = Boolean(f.giorni?.length || f.date?.length);
   return `<div class="voce voce-frase"${indice === undefined ? '' : ` data-indice="${indice}"`}>
     <div class="testa-voce">
       <span class="etichetta-voce">Frase</span>
@@ -252,10 +262,7 @@ function voceFrase(f, indice) {
     <label class="autore">Autore <input name="autore" maxlength="40" value="${esc(f.autore)}"></label>
     <details class="regole"${haRegole ? ' open' : ''}>
       <summary><span class="chevron" aria-hidden="true"></span>Regole<span class="riepilogo"> · ${esc(riepilogoRegole(f))}</span></summary>
-      <div class="riga">
-        <label>Giorni <input name="giorni" placeholder="giovedì, venerdì" value="${esc((f.giorni ?? []).join(', '))}"></label>
-        <label>Probabilità <input name="probabilita" type="number" min="0" max="1" step="0.05" placeholder="sempre" value="${esc(f.probabilita ?? '')}"></label>
-      </div>
+      ${sceltaGiorni(f.giorni)}
       <fieldset class="date">
         <legend>Date</legend>
         ${[...(f.date ?? []), ''].map((d) => rigaData(d, true)).join('\n        ')}

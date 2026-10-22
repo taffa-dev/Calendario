@@ -135,7 +135,7 @@ if (editor) {
     return {
       ...voce,
       testo: valori(riga, 'testo')[0], autore: valori(riga, 'autore')[0],
-      giorni: valori(riga, 'giorni')[0], probabilita: valori(riga, 'probabilita')[0],
+      giorni: [...riga.querySelectorAll('[name="giorni"]:checked')].map((x) => x.value),
       data: valori(riga, 'data'), ripeti: valori(riga, 'ripeti')
     };
   };
@@ -252,10 +252,8 @@ if (editor) {
 {
   const riepilogo = (voce) => {
     const parti = [];
-    const giorni = voce.querySelector('[name="giorni"]')?.value.trim();
-    if (giorni) parti.push(giorni);
-    const p = Number(voce.querySelector('[name="probabilita"]')?.value);
-    if (p) parti.push(`${Math.round(p * 100)}%`);
+    const giorni = [...voce.querySelectorAll('[name="giorni"]:checked')].map((x) => x.value);
+    if (giorni.length) parti.push(giorni.join(', '));
     const date = [...voce.querySelectorAll('.date [name="data"]')].filter((d) => d.value).length;
     if (date) parti.push(date === 1 ? '1 data' : `${date} date`);
     return ` · ${parti.join(', ') || 'tutti i giorni'}`;

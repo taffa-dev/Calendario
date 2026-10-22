@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 // Archivio delle proposte (SQLite integrato in Node, nessun modulo nativo da compilare).
-// Stati: nuova → approvata → pubblicata, oppure scartata. Le regole (giorni, date, probabilita)
+// Stati: nuova → approvata → pubblicata, oppure scartata. Le regole (giorni, date)
 // sono quelle di src/frasi.json, salvate come JSON.
 
 export function apriArchivio(percorso) {

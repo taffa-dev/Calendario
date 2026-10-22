@@ -1,0 +1,19 @@
+# Tema e vincoli tecnici
+
+Scopo: tema chiaro/scuro, icone, niente app installabile, safe area, hover, font.
+Leggere quando: tocchi il tema, `index.html`, i colori, le icone in alto, il service worker, i font o le regole hover/touch.
+Ultimo aggiornamento: 22/10/2026 (spostato da CLAUDE.md senza modifiche al contenuto)
+
+## Tema
+- Lo script in `index.html` applica il tema prima del primo disegno (scelta salvata, altrimenti quella del sistema): niente lampo del tema sbagliato. `tema.js` lo legge e lo cambia.
+- Attributo `color-theme="dark"` su `<html>` e chiave `localStorage` `color-theme` (`dark`/`light`): non rinominarli, le scelte già salvate andrebbero perse.
+- Ogni testo colorato ha `transition: color var(--cambio-tema)`, così sfuma insieme allo sfondo. `prefers-reduced-motion` azzera la durata.
+- `theme-color` (barre del telefono) segue il tema e la stagione, anche quando lo si cambia col pulsante (`aggiornaBarre()` legge `--color-bg`).
+
+## Vincoli tecnici
+- Icone in alto identiche a quelle di Pills (stesso `Icona.vue`; colore del testo, opacità 0.55 che sale a 1 con hover/focus e sul quadratino aperto, messa sull'`svg` per non sommarsi a quella del ventaglio): `top: env(safe-area-inset-top)` (e così il lato), `padding: 0.875rem`, `font-size: 1.25rem`: icona di 20px in un'area da toccare di 48px (Material 48dp, Apple 44pt, WCAG 2.5.5 44px: l'utente le trovava piccole e scomode); frecce laterali 44×48, ventaglio con raggio 4.25rem perché le aree non si sovrappongano; il link a Pills sta dove in Pills c'è il link al Calendario. Se cambiano qui, vanno cambiate anche là. I link tra i due si aprono nella stessa pagina.
+- **Niente app installabile** (scelta dell'utente: aprire Pills dal Calendario o viceversa apriva il browser interno dell'app). Niente manifest; `public/sw.js` resta solo per chi l'aveva installata: cancella le copie salvate e si disattiva; `main.js` disattiva i service worker rimasti. Non rimettere un service worker che salva copie.
+- `viewport-fit=cover`: sfondo su `html` e `body`, `env(safe-area-inset-*)` per tutto ciò che è fisso ai bordi.
+- Effetti hover solo dentro `@media (hover: hover) and (pointer: fine)`: sui touch screen `:hover` resta attivo dopo il tocco.
+- Nessuna risorsa esterna (font e icone sono in casa).
+- Font senza lampo: `index.html` precarica i tre pesi latin, `font.css` usa `font-display: block` e `main.js` monta l'app solo a font caricati (al massimo 1,5s di attesa; lo sfondo è già su `html`/`body`). Prima compariva un istante col font di ripiego e poi tutto si spostava (anche l'impaginazione dei numeri).

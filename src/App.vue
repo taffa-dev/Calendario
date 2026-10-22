@@ -143,13 +143,20 @@ function toccoFinito(evento) {
   if (strappoTirato && !(va && passi === 1)) {
     riprendi(strappoTirato, -1).addEventListener('finish', () => (anteprima.value = null));
   }
+  // Strappato oltre la soglia dopo essere andato a destra: il foglio che risaliva si scarta, altrimenti
+  // restava lì (insieme al giorno dopo sotto, in anteprima) e il foglio fermo a metà
+  if (va && passi === 1) {
+    ritornoTirato?.forEach((a) => a.cancel());
+    ritorno.value = null;
+    return vai(1, strappoTirato);
+  }
   if (ritornoTirato) {
     if (!ritornoTirato.length) ritorno.value = null;
     else if (va && passi === -1) riattacca(ritornoTirato);
     else riprendi(ritornoTirato, -1).addEventListener('finish', () => (ritorno.value = null));
     return;
   }
-  if (va) return vai(passi, passi === 1 ? strappoTirato : null);
+  if (va) return vai(passi);
   if (foglio.value.style.transform) torna(foglio.value, elastico(dx, innerWidth) * 0.5, velocita);
 }
 // Il foglio tirato su dal dito finisce di riattaccarsi mentre quello di oggi, sotto, svanisce; poi
