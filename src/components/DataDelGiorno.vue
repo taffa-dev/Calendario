@@ -17,11 +17,15 @@ const anno = props.data.getFullYear();
 <template>
   <div class="data" :style="correzioni">
     <div class="numeri">
-      <div class="giorno">{{ giorno }}</div>
+      <div class="giorno" :data-g="giorno">{{ giorno }}</div>
       <div class="anno">{{ anno }}</div>
     </div>
     <div :class="['mese', { 'con-ricorrenze': ricorrenze.length }]">
       <span>{{ mese }}</span>
+      <!-- Ornamento delle stagioni (per ora solo Halloween), al centro della riga: vedi sotto -->
+      <span class="luna" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M15 2a10 10 0 1 0 7 17A8 8 0 0 1 15 2z" /></svg>
+      </span>
       <p v-if="ricorrenze.length" class="ricorrenze">
         <span v-for="nome in ricorrenze" :key="nome">{{ nome }}</span>
       </p>
@@ -82,6 +86,86 @@ const anno = props.data.getFullYear();
   border-bottom: 1px solid var(--color-3);
   padding: 0 15%;
   padding-bottom: 10%;
+}
+
+/* Halloween: una luna inclinata al centro della riga, che si interrompe attorno a lei (la riga diventa
+   un filo mascherato, il bordo resta per non spostare nulla). Nelle altre stagioni non c'è */
+.luna {
+  display: none;
+}
+
+:root[stagione="halloween"] .mese {
+  position: relative;
+  /* Mezza luna più un respiro di 10 unità (almeno 7px) per lato */
+  --vuoto: calc(max(18px, 24 * var(--u)) / 2 + max(7px, 10 * var(--u)));
+  border-bottom-color: transparent;
+}
+
+:root[stagione="halloween"] .mese::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background-color: var(--color-3);
+  transition: background-color var(--cambio-tema);
+  -webkit-mask: linear-gradient(90deg, #000 calc(50% - var(--vuoto)), transparent calc(50% - var(--vuoto)) calc(50% + var(--vuoto)), #000 calc(50% + var(--vuoto)));
+  mask: linear-gradient(90deg, #000 calc(50% - var(--vuoto)), transparent calc(50% - var(--vuoto)) calc(50% + var(--vuoto)), #000 calc(50% + var(--vuoto)));
+}
+
+:root[stagione="halloween"] .luna {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, calc(50% + 0.5px)) rotate(-25deg);
+  line-height: 0;
+}
+
+.luna svg {
+  display: block;
+  height: max(18px, calc(24 * var(--u)));
+  aspect-ratio: 1;
+}
+
+.luna path {
+  fill: var(--color-1);
+  transition: fill var(--cambio-tema);
+}
+
+/* Lume di candela (solo di notte): il bagliore è una copia sfocata del numero dietro di lui, e si
+   anima solo l'opacità. L'alone arancio sta in Halloween.vue */
+:root[stagione="halloween"] .giorno::after {
+  content: attr(data-g);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: #ffb050;
+  filter: blur(calc(20 * var(--u)));
+  opacity: 0;
+  transition: opacity var(--cambio-tema);
+  pointer-events: none;
+}
+
+:root[stagione="halloween"][color-theme="dark"] .giorno::after {
+  opacity: 0.3;
+  animation: fiamma 7.3s ease-in-out infinite;
+}
+
+@keyframes fiamma {
+  0%, 100% { opacity: 0.28; }
+  18% { opacity: 0.34; }
+  31% { opacity: 0.23; }
+  52% { opacity: 0.32; }
+  67% { opacity: 0.22; }
+  84% { opacity: 0.36; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[stagione="halloween"][color-theme="dark"] .giorno::after {
+    animation: none;
+  }
 }
 
 /* Con le ricorrenze la riga sta subito sotto di loro */

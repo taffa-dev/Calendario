@@ -17,3 +17,15 @@ Ultimo aggiornamento: 22/10/2026 (spostato da CLAUDE.md senza modifiche al conte
 - Effetti hover solo dentro `@media (hover: hover) and (pointer: fine)`: sui touch screen `:hover` resta attivo dopo il tocco.
 - Nessuna risorsa esterna (font e icone sono in casa).
 - Font senza lampo: `index.html` precarica i tre pesi latin, `font.css` usa `font-display: block` e `main.js` monta l'app solo a font caricati (al massimo 1,5s di attesa; lo sfondo è già su `html`/`body`). Prima compariva un istante col font di ripiego e poi tutto si spostava (anche l'impaginazione dei numeri).
+
+## Sincronia con Pills (decisione dell'utente, 26/10/2026)
+I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi periodi, colori ed effetti. Cambiando una stagione qui, cambiarla anche in Pills (e viceversa). Estate = tutto agosto.
+
+## Halloween (26/10/2026)
+- Attivo la settimana lun-dom che contiene il 31/10 (`stagioneDi` in `src/stagione.js`, copiato anche nello script di `index.html` per il primo disegno; test in `test/stagione.test.mjs`). Colori in `tema.css` (`:root[stagione="halloween"]`), effetti in `components/Halloween.vue` (pipistrelli, ragnatele solo di giorno, grana e alone candela solo di notte; a livello pagina, fuori dai fogli), luna e bagliore del numero in `DataDelGiorno.vue`. Provino di riferimento: `recupero-stagioni/index.html`.
+- Vue scoped CSS: `:global(sel) .x` butta via `.x` e la regola vale per tutto. Scrivere `:root[stagione="halloween"] .x` senza `:global` (viene scopato solo il selettore più a destra).
+- La riga sotto il mese è il `border-bottom` di `.mese`; in Halloween diventa trasparente e la riga è un `::after` con maschera lineare, interrotta attorno alla luna: l'altezza non cambia e non serve un riquadro con lo sfondo (di notte si vedrebbe sull'alone arancio).
+- Il bagliore del numero è `::after` di `.giorno` con `content: attr(data-g)`: segue il foglio quando si strappa. La grana sta a z-index 3, sopra il foglio (trasparente).
+- Con `prefers-reduced-motion` alone e ragnatele hanno `animation: none` (non `paused`: restavano a opacità 0 per il fade di ingresso).
+- Per testare `stagioneDi` in Node serve un `document` finto con `createElement`/`createElementNS` prima dell'import dinamico (`stagione.js` importa `tema.js` e Vue).
+- Pipistrelli: 2 fissi (1 sotto i 600px), non legati a `getNumeroDelGiorno` come in Pills.

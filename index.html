@@ -21,7 +21,7 @@
       try { salvato = localStorage.getItem('color-theme'); } catch (e) { }
       var scuro = salvato ? salvato === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (scuro) document.documentElement.setAttribute('color-theme', 'dark');
-      // Pasqua (dal lunedì santo a Pasquetta): colori dei ciliegi. Calcolo come in src/stagione.js e
+      // Stagioni: Pasqua (dal lunedì santo a Pasquetta, colori dei ciliegi) e Halloween. Calcolo come in src/stagione.js e
       // src/ricorrenze.js; in sviluppo segue ?data=
       var oggi = new Date();
       var simulata = '%MODE%' === 'development' && new URLSearchParams(location.search).get('data');
@@ -32,9 +32,14 @@
       var m = Math.floor((a + 11 * h + 22 * l) / 451), n = h + l - 7 * m + 114;
       var giorni = Math.round((new Date(anno, oggi.getMonth(), oggi.getDate(), 12) - new Date(anno, Math.floor(n / 31) - 1, n % 31 + 1, 12)) / 86400000);
       var pasqua = giorni >= -6 && giorni <= 1;
+      // Halloween: la settimana (lunedì - domenica) del 31 ottobre
+      var trentuno = new Date(anno, 9, 31).getDay(), da = 31 - (trentuno + 6) % 7;
+      var oggiIntero = new Date(anno, oggi.getMonth(), oggi.getDate());
+      var halloween = oggiIntero >= new Date(anno, 9, da) && oggiIntero <= new Date(anno, 9, da + 6);
       if (pasqua) document.documentElement.setAttribute('stagione', 'pasqua');
+      if (halloween) document.documentElement.setAttribute('stagione', 'halloween');
       // Barre del telefono: con una scelta salvata seguono quella e non il sistema
-      var chiaro = pasqua ? '#fcf0f2' : '#fff8ec', buio = pasqua ? '#24121d' : '#230505';
+      var chiaro = halloween ? '#fcf7ee' : pasqua ? '#fcf0f2' : '#fff8ec', buio = halloween ? '#1a1020' : pasqua ? '#24121d' : '#230505';
       document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
         var perScuro = salvato ? scuro : meta.media.indexOf('dark') >= 0;
         meta.content = perScuro ? buio : chiaro;

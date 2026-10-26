@@ -40,6 +40,24 @@
   --petalo-punta: #a29cba;
 }
 
+/* Halloween (src/stagione.js): inchiostro zucca su carta crema; di notte sfondo prugna e inchiostri
+   caldi come alla luce di una candela */
+:root[stagione="halloween"] {
+  --color-bg: #fcf7ee;
+  --color-1: #c96c36;
+  --color-2: #5c1f00;
+  --color-3: #341404;
+}
+
+:root[stagione="halloween"][color-theme="dark"] {
+  --color-bg: #1a1020;
+  --color-1: #ef9640;
+  --color-2: #c96854;
+  --color-3: #d1ae94;
+  --ombra-foglio: rgb(8 2 14 / 0.5);
+  --bordo-foglio: rgb(8 2 14 / 0.3);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --cambio-tema: 0s;

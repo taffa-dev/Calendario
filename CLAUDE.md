@@ -8,6 +8,7 @@ Calendario: un foglio di calendario con la data di oggi e una frase celebre dei 
 
 - **Il README resta volutamente scarno e misterioso**: la documentazione tecnica sta qui e in `docs/kb/`.
 - **`mazzo.js` e `Icona.vue` sono identici in Pills**: se cambiano in uno vanno copiati nell'altro (così anche le icone in alto). Dettagli: `docs/kb/struttura.md`, `docs/kb/tema-e-vincoli.md`.
+- **I temi stagionali di Calendario e Pills restano sempre sincronizzati** (decisione dell'utente, 26/10/2026): stessi periodi, stessi colori e stessi effetti; ogni modifica a una stagione (date, tavolozza, animazioni) va fatta in entrambi i progetti. Dettagli: `docs/kb/tema-e-vincoli.md`, in Pills [grafica-e-effetti.md](docs/kb/grafica-e-effetti.md).
 - **`src/programma.json` lo aggiorna solo `npm run programma`** (in pratica la GitHub Action): non modificarlo a mano. Dettagli: `docs/kb/scelta-frase.md`.
 - **Le nuove frasi vanno sempre in fondo a `src/frasi.json`**: l'ordine conta per il mazzo. Il testo senza « ». Dettagli: `docs/kb/struttura.md`.
 - **Tema**: non rinominare `color-theme` (attributo su `<html>` e chiave `localStorage`). Dettagli: `docs/kb/tema-e-vincoli.md`.

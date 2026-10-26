@@ -13,6 +13,7 @@ import DataDelGiorno from './components/DataDelGiorno.vue';
 import Frase from './components/Frase.vue';
 import Icona from './components/Icona.vue';
 import Petali from './components/Petali.vue';
+import Halloween from './components/Halloween.vue';
 import Coriandoli from './components/Coriandoli.vue';
 import { stagioneDi, applicaStagione } from './stagione.js';
 import {
@@ -26,7 +27,7 @@ const SUGGERIMENTI_URL = 'https://frase-celebre.taffa-dev.site/';
 
 const oggi = ref(getOggi());
 
-// Tema stagionale (Pasqua): colori e petali; segue il giorno se la pagina resta aperta
+// Tema stagionale (Pasqua, Halloween): colori ed effetti; segue il giorno se la pagina resta aperta
 const stagione = computed(() => stagioneDi(oggi.value));
 watchEffect(() => applicaStagione(stagione.value));
 
@@ -272,6 +273,7 @@ onBeforeUnmount(() => {
 
 <template>
   <Petali v-if="stagione === 'pasqua'" />
+  <Halloween v-if="stagione === 'halloween'" />
   <Coriandoli :scoppio="scoppio" />
 
   <button v-show="indietro < giorniDaLunedi" class="icona freccia a-sinistra" type="button" @click="vai(-1)"
