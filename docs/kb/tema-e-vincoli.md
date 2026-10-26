@@ -45,3 +45,10 @@ I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi 
 - I rami non usano `mix-blend-mode: multiply`: `.estate` crea uno stacking context e il multiply non avrebbe nulla da mescolare; basta `#4a3a1a` a bassa opacità.
 - Lucciole: da 6 a 16, distanti almeno 70px, solo sotto il 52% dell'altezza, fuori da `.data`/`.frase` (margine 36px) e dalle frecce; con `prefers-reduced-motion` ferme a opacità .5.
 - Da fare: controllo su un telefono vero.
+
+## Pipistrelli: nuovo motore di volo (26/10/2026)
+- I pipistrelli di Halloween non sono più loop CSS: `.pipistrelli` è un div vuoto riempito da `src/volo.js` (rAF, un solo transform per pipistrello, ali interpolate in JS con `setAttribute('d')`, quindi animate anche su Safari). `volo.js` e `test/volo.test.mjs` sono IDENTICI in Pills (come `mazzo.js` e `Icona.vue`): ogni modifica va copiata nell'altro progetto. Provini approvati: `recupero-stagioni/pipistrelli.html` e `pipistrelli-pills.html`.
+- Volo: raffiche di battiti e planate sincronizzate con la salita del corpo, traiettoria a molla con virate e inversioni a U, profondità (qualche pipistrello grande e sfocato in primo piano), voli a eventi (uno ogni 10-40 s, all'apertura già 2 in volo, tetto `MAX_PIP` 5), fasce libere da `metti()` con fallback sopra il numero. Costanti in `TARATURA` in cima a `volo.js`; le differenze di un progetto passano da `config.taratura`.
+- Stile in Vue scoped solo con `:deep(.pip)` e `:deep(svg)` (gli elementi nascono da JS). L'opacità dell'svg sta nel CSS (.42 chiaro, .7 scuro) e il motore ci moltiplica la sua.
+- In dev `window.__pip` espone il motore: `__pip.setRitmoReale(false)` e `__pip.evento()` per le prove. Con `prefers-reduced-motion` non parte nulla.
+- Decisione dell'utente (26/10/2026) ancora valida: nessuna maschera, i pipistrelli passano sopra le ragnatele senza sparire.

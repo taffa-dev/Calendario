@@ -1,10 +1,11 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { tema } from '../tema.js';
+import { creaMotore, TARATURA } from '../volo.js';
 
-// Halloween (settimana del 31/10): pipistrelli di Pills che volano dietro il foglio, ragnatele negli
+// Halloween (settimana del 31/10): pipistrelli (stesso motore di Pills) che volano dietro il foglio, ragnatele negli
 // angoli (solo di giorno), grana della carta e, di notte, il lume di candela (alone; il bagliore del
 // numero sta in DataDelGiorno.vue). A livello pagina, non per foglio. Colori da tema.css.
-const SU = 'M46 28 C40 18 26 8 9 3 C13 9 14 15 12 21 C18 19 24 21 26 27 C30 25 36 27 38 33 C41 30 44 30 46 35 Z';
 const rnd = (a, b) => a + Math.random() * (b - a);
 
 // Ragnatela d'angolo: il primo e l'ultimo raggio corrono lungo i due bordi, così i fili partono e finiscono
@@ -34,12 +35,14 @@ function disegnaRagnatela(seme) {
 const filiAlto = disegnaRagnatela(5);
 const filiBasso = disegnaRagnatela(23);
 
-// Pochi pipistrelli, a velocità costante in px/s così sugli schermi larghi non sfrecciano. Creati una
-// volta sola; ne cambia l'altezza quando cambia la pagina
-const voli = ref([]);
-const QUANTI = 2;
+// Pipistrelli: il motore di volo (src/volo.js, identico in Pills) disegna voli sporadici ogni 10-40 s,
+// più due già in volo all'apertura. Volano solo nelle fasce libere sopra il numero e sotto la frase
+// (mai sul testo); sul telefono ne basta una, la più bassa. Se non ce n'è nessuna (schermo largo e
+// basso) si vola subito sopra il numero.
+const contenitore = ref(null);
+const fermo = window.matchMedia('(prefers-reduced-motion: reduce)');
+let motore, osservatore, ultima = '';
 
-// Fasce libere sopra il numero e sotto la frase (mai sul testo); sul telefono ne basta una, la più bassa
 function metti() {
   const foglio = document.querySelector('.calendario .foglio:not([aria-hidden="true"])');
   const data = foglio?.querySelector('.data'), frase = foglio?.querySelector('.frase');
@@ -47,49 +50,51 @@ function metti() {
   const H = innerHeight;
   const cima = data.getBoundingClientRect().top;
   const fondo = frase.getBoundingClientRect().bottom;
-  const fasce = [[110, cima - 95], [fondo + 90, H - 130]].filter(([a, b]) => b - a > 24);
-  const comode = fasce.filter(([a, b]) => b - a >= 60);
-  const usate = (comode.length ? comode : fasce.length ? fasce : [[110, 130]]).slice(innerWidth < 600 ? -1 : 0);
-  voli.value.forEach((volo, i) => {
-    const [a, b] = usate[i % usate.length];
-    volo.nascosto = i >= usate.length;
-    volo.top = Math.round(a + volo.t * (b - a));
-  });
+  const tutte = [[110, cima - 95], [fondo + 90, H - 130]].filter(([a, b]) => b - a > 24);
+  const comode = tutte.filter(([a, b]) => b - a >= 60);
+  const usate = (comode.length ? comode : tutte.length ? tutte : [[40, Math.max(100, cima - 30)]]).slice(innerWidth < 600 ? -1 : 0);
+  motore.setFasce(usate);
 }
 
-let osservatore, ultima = '';
 function controlla() {
   const misura = `${innerWidth}x${innerHeight}`;
   if (misura !== ultima) { ultima = misura; metti(); }
 }
 
+// Movimento ridotto: nessun volo. Altrimenti parte (la prima volta con due pipistrelli già in volo)
+function avvia() {
+  if (fermo.matches) { motore.ferma(); return; }
+  if (motore.pipistrelli.length) return;
+  motore.avvia(contenitore.value);
+  metti();
+  motore.iniziale(2);
+}
+
 onMounted(() => {
-  voli.value = Array.from({ length: QUANTI }, (_, i) => {
-    const vic = rnd(.4, 1), durata = (innerWidth + 120) / (35 + vic * 45);
-    return {
-      t: Math.random(),
-      top: 0,
-      nascosto: false,
-      daDestra: Math.random() < .5,
-      opacity: .6 + vic * .4,
-      durata,
-      rit: -((i + Math.random()) / QUANTI) * durata,
-      suGiu: rnd(2.6, 4.4),
-      zigzag: rnd(1.2, 2),
-      larghezza: `clamp(30px, calc(${(18 + vic * 22).toFixed(1)} * (.75px + .14vmin)), 34px + 6vmin)`,
-      battito: rnd(.28, .4)
-    };
+  // L'opacità dell'svg (.42 di giorno, .7 di notte) sta nel CSS: il motore ci moltiplica la sua
+  const baseSvg = () => (tema.value === 'dark' ? .7 : .42);
+  motore = creaMotore({
+    larghezzaBase(W, H) { const v = Math.min(W, H); return Math.min(Math.max(32 * (.75 + .14 * v / 100), 30), 34 + .06 * v); },
+    velocita: (z) => 40 + 40 * z,           // px/s: i lontani sono più lenti
+    sfocaturaMax: 1,                        // px di blur per i più lontani
+    opacita: (z) => .55 + .45 * z,
+    opacitaFg: () => TARATURA.FG_OPACITA / baseSvg()
   });
+  if (import.meta.env.DEV) window.__pip = motore; // solo in sviluppo: per le prove
   // L'altezza dipende dall'impaginazione del foglio (ricorrenze, frase lunga): si segue la pila
   osservatore = new ResizeObserver(() => { ultima = ''; controlla(); });
   const pila = document.querySelector('.calendario .pila');
   if (pila) osservatore.observe(pila);
   window.addEventListener('resize', controlla);
-  metti();
+  fermo.addEventListener('change', avvia);
+  avvia();
 });
 onBeforeUnmount(() => {
   osservatore?.disconnect();
   window.removeEventListener('resize', controlla);
+  fermo.removeEventListener('change', avvia);
+  motore?.ferma();
+  if (import.meta.env.DEV && window.__pip === motore) delete window.__pip;
 });
 </script>
 
@@ -101,29 +106,7 @@ onBeforeUnmount(() => {
       <svg viewBox="-180 0 480 480"><path class="fili" :d="filiAlto" /></svg>
       <svg class="basso" viewBox="-180 0 480 480"><path class="fili" :d="filiBasso" /></svg>
     </div>
-    <div class="pipistrelli">
-      <div v-for="(v, i) in voli" :key="i" :class="['volo', { 'da-destra': v.daDestra }]" :style="{
-        top: v.top + 'px',
-        display: v.nascosto ? 'none' : null,
-        opacity: v.opacity,
-        animationDuration: v.durata + 's',
-        animationDelay: v.rit + 's'
-      }">
-        <div class="su-giu" :style="{ animationDuration: v.suGiu + 's', animationDelay: v.rit + 's' }">
-          <div class="zigzag" :style="{ animationDuration: v.zigzag + 's', animationDelay: v.rit + 's' }">
-            <svg viewBox="0 0 100 60" :style="{ width: v.larghezza, '--battito': v.battito + 's' }">
-              <g class="ali-fluide">
-                <path :d="SU" />
-                <path :d="SU" transform="translate(100 0) scale(-1 1)" />
-              </g>
-              <ellipse cx="50" cy="32" rx="5" ry="9" />
-              <circle cx="50" cy="22" r="5" />
-              <path d="M45.5 20 L44 11 L49 17 Z M54.5 20 L56 11 L51 17 Z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div ref="contenitore" class="pipistrelli"></div>
   </div>
 </template>
 
@@ -231,80 +214,29 @@ onBeforeUnmount(() => {
   transition: stroke var(--cambio-tema);
 }
 
-/* Pipistrelli di Pills: volo + su-giù + zigzag con durate diverse, ali interpolate. */
-.pipistrelli {
-  container-type: size;
+/* Pipistrelli: li crea e li muove volo.js (un transform per pipistrello); qui solo l'aspetto. Passano
+   sopra le ragnatele senza sfumare (nessuna maschera) */
+.pipistrelli :deep(.pip) {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform, opacity;
 }
 
-.pipistrelli svg {
+.pipistrelli :deep(svg) {
   display: block;
+  width: 100%;
   aspect-ratio: 100 / 60;
   overflow: visible;
   fill: var(--color-3);
   opacity: .42;
+  filter: blur(var(--sf, 0px));
   transition: fill var(--cambio-tema);
 }
 
-:root[color-theme="dark"] .pipistrelli svg {
+:root[color-theme="dark"] .pipistrelli :deep(svg) {
   fill: #553848;
   opacity: .7;
-}
-
-.volo {
-  position: absolute;
-  left: 0;
-  animation: da-sinistra linear infinite;
-}
-
-.volo.da-destra {
-  animation-name: da-destra;
-}
-
-@keyframes da-sinistra {
-  from { transform: translateX(-60px); }
-  to { transform: translateX(calc(100cqw + 60px)); }
-}
-
-@keyframes da-destra {
-  from { transform: translateX(calc(100cqw + 60px)); }
-  to { transform: translateX(-60px); }
-}
-
-.su-giu {
-  animation: su-giu ease-in-out infinite;
-}
-
-@keyframes su-giu {
-  0%, 100% { transform: translateY(0); }
-  15% { transform: translateY(-28px); }
-  30% { transform: translateY(-10px); }
-  42% { transform: translateY(22px); }
-  58% { transform: translateY(6px); }
-  70% { transform: translateY(34px); }
-  85% { transform: translateY(-14px); }
-}
-
-.zigzag {
-  animation: zigzag ease-in-out infinite;
-}
-
-@keyframes zigzag {
-  0%, 100% { transform: translateX(0) rotate(0); }
-  20% { transform: translateX(14px) rotate(9deg); }
-  45% { transform: translateX(-10px) rotate(-12deg); }
-  65% { transform: translateX(8px) rotate(5deg); }
-  85% { transform: translateX(-16px) rotate(-8deg); }
-}
-
-.ali-fluide path {
-  animation: battito-fluido var(--battito) ease-in-out infinite;
-}
-
-@keyframes battito-fluido {
-  0%, 100% { d: path("M46 28 C40 18 26 8 9 3 C13 9 14 15 12 21 C18 19 24 21 26 27 C30 25 36 27 38 33 C41 30 44 30 46 35 Z"); }
-  20% { d: path("M46 28 C38 22 20 20 3 24 C9 28 12 32 10 38 C16 34 22 35 24 41 C28 36 35 36 37 42 C40 37 43 36 46 38 Z"); }
-  40% { d: path("M46 29 C38 31 25 39 13 53 C17 50 20 50 21 55 C24 50 28 49 30 53 C32 48 36 46 38 48 C40 44 43 41 46 40 Z"); }
-  70% { d: path("M46 28 C38 22 20 20 3 24 C9 28 12 32 10 38 C16 34 22 35 24 41 C28 36 35 36 37 42 C40 37 43 36 46 38 Z"); }
 }
 
 /* Movimento ridotto: i pipistrelli spariscono, il resto resta fermo */
