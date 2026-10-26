@@ -12,6 +12,9 @@ const mese = MESI[props.data.getMonth()];
 const { spostaGiorno, vicinoAnno, spazioMese } = impaginazione(giorno, mese);
 const correzioni = { '--sposta-giorno': spostaGiorno, '--vicino-anno': vicinoAnno, '--spazio-mese': spazioMese };
 const anno = props.data.getFullYear();
+// Estate: la riga è un'onda continua (un periodo ogni 50 unità, 8 periodi)
+let onda = 'M0 7 Q12.5 1.5 25 7';
+for (let x = 50; x <= 400; x += 25) onda += ` T${x} 7`;
 </script>
 
 <template>
@@ -28,6 +31,10 @@ const anno = props.data.getFullYear();
       </span>
       <span class="stella" aria-hidden="true">
         <svg viewBox="-12 -12 24 24"><path d="M0-12 2.2-2.2 12 0 2.2 2.2 0 12-2.2 2.2-12 0-2.2-2.2Z" /></svg>
+      </span>
+      <!-- Estate: onda che scorre piano al posto della riga, con le estremità sfumate -->
+      <span class="mare" aria-hidden="true">
+        <svg viewBox="0 0 400 14" preserveAspectRatio="none"><path :d="onda" /></svg>
       </span>
       <p v-if="ricorrenze.length" class="ricorrenze">
         <span v-for="nome in ricorrenze" :key="nome">{{ nome }}</span>
@@ -173,6 +180,54 @@ const anno = props.data.getFullYear();
   transition: fill var(--cambio-tema);
 }
 
+/* Estate: la riga diventa un'onda continua che scorre piano. Il bordo resta (trasparente) per non
+   spostare nulla; l'onda è centrata su di lui e sfuma alle estremità. Di notte la linea è più marcata */
+.mare {
+  display: none;
+}
+
+:root[stagione="estate"] .mese {
+  position: relative;
+  border-bottom-color: transparent;
+}
+
+:root[stagione="estate"] .mare {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(10px, calc(14 * var(--u)));
+  transform: translateY(calc(50% + 0.5px));
+  overflow: hidden;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.mare svg {
+  display: block;
+  width: 200%;
+  height: 100%;
+  animation: mare 18s linear infinite;
+}
+
+.mare path {
+  fill: none;
+  stroke: var(--mare);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--cambio-tema);
+}
+
+:root[color-theme="dark"] .mare path {
+  stroke-width: 2.4;
+}
+
+@keyframes mare {
+  to { transform: translateX(-50%); }
+}
+
 /* Lume di candela (solo di notte): il bagliore è una copia sfocata del numero dietro di lui, e si
    anima solo l'opacità. L'alone arancio sta in Halloween.vue */
 :root[stagione="halloween"] .giorno::after {
@@ -203,7 +258,8 @@ const anno = props.data.getFullYear();
 
 @media (prefers-reduced-motion: reduce) {
   :root[stagione="halloween"][color-theme="dark"] .giorno::after,
-  .stella svg {
+  .stella svg,
+  .mare svg {
     animation: none;
   }
 }

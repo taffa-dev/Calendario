@@ -45,3 +45,14 @@ test('Natale: dal 8 dicembre al 6 gennaio compresi, a cavallo d anno', () => {
   assert.equal(stagioneDi(giorno(2026, 12, 7, 23)), null);
   assert.equal(stagioneDi(giorno(2027, 1, 7, 0)), null);
 });
+
+test('Estate: tutto agosto, Natale e Halloween invariati', () => {
+  assert.equal(stagioneDi(giorno(2026, 8, 1, 0)), 'estate');
+  assert.equal(stagioneDi(giorno(2026, 8, 14)), 'estate');
+  assert.equal(stagioneDi(giorno(2026, 8, 31, 23)), 'estate');
+  assert.equal(stagioneDi(giorno(2026, 7, 31, 23)), null);
+  assert.equal(stagioneDi(giorno(2026, 9, 1, 0)), null);
+  assert.equal(stagioneDi(giorno(2026, 12, 25)), 'natale');
+  assert.equal(stagioneDi(giorno(2026, 10, 28)), 'halloween');
+  assert.equal(stagioneDi(giorno(2027, 3, 29)), 'pasqua');
+});

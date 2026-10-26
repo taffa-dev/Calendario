@@ -38,3 +38,10 @@ I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi 
 - Bagliore e ornamento usano la variabile `--ornamento` (oro `#9c7520` di giorno, `#ecdcaa` di notte). `DataDelGiorno.vue` ha due ornamenti, `.luna` (Halloween) e `.stella` (Natale), con la stessa regola `--vuoto`; la stella è più piccola (16u contro 24u).
 - `Natale.vue` usa `window.matchMedia`: non è testabile in Node. Nei test un apostrofo nel titolo (`d'anno`) rompeva la stringa a virgolette singole.
 - Da fare: confronto a occhio col provino su un telefono vero.
+
+## Estate (26/10/2026)
+- Tutto agosto (`getMonth() === 7`, come Pills): `stagioneDi` e script di `index.html`; test in `test/stagione.test.mjs`. Colori e `--mare` in `tema.css`; effetti in `components/Estate.vue` (ombra di rami solo di giorno, lucciole solo di notte, a livello pagina); l'onda è la riga sotto il mese (`.mare` in `DataDelGiorno.vue`: svg al 200% di larghezza con `translateX(-50%)` perché è periodica; il `border-bottom` resta trasparente, altezza invariata; di notte linea più spessa, 2.4 contro 1.8). Provino: `recupero-stagioni/index.html?s=estate`.
+- Rami: dimensionati sullo spazio libero, non sul viewport (il provino usava `36vmax`/`64vmin`/`60vw` e in finestre strette e alte copriva il testo: segnalato dall'utente il 26/10/2026). Il ramo grande parte da min(40% larghezza, 35% altezza), il piccolo da min(28%, 28%) e si rimpicciolisce a passi del 7% finché non tocca più `.data`, `.frase` e le frecce; sotto la metà del massimo sparisce. Si rimisura al resize e osservando `.pila`. Foglie più piccole e rade del provino, opacità .14.
+- I rami non usano `mix-blend-mode: multiply`: `.estate` crea uno stacking context e il multiply non avrebbe nulla da mescolare; basta `#4a3a1a` a bassa opacità.
+- Lucciole: da 6 a 16, distanti almeno 70px, solo sotto il 52% dell'altezza, fuori da `.data`/`.frase` (margine 36px) e dalle frecce; con `prefers-reduced-motion` ferme a opacità .5.
+- Da fare: controllo su un telefono vero.

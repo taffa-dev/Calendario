@@ -78,6 +78,26 @@
   --bordo-foglio: rgb(3 12 8 / 0.3);
 }
 
+/* Estate (src/stagione.js, tutto agosto): ocra del sole sul numero, il mare nella riga che ondeggia;
+   di notte blu notte con inchiostri albicocca e sabbia, e il mare che prende la luce della luna */
+:root[stagione="estate"] {
+  --color-bg: #fcf7ee;
+  --color-1: #c18d33;
+  --color-2: #5c3700;
+  --color-3: #342104;
+  --mare: #2b7a80;
+}
+
+:root[stagione="estate"][color-theme="dark"] {
+  --color-bg: #1c2034;
+  --color-1: #f2c46d;
+  --color-2: #da9262;
+  --color-3: #d9c2a1;
+  --mare: #a9c6dc;
+  --ombra-foglio: rgb(5 7 20 / 0.5);
+  --bordo-foglio: rgb(5 7 20 / 0.3);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --cambio-tema: 0s;
