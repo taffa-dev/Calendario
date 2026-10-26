@@ -21,7 +21,7 @@
       try { salvato = localStorage.getItem('color-theme'); } catch (e) { }
       var scuro = salvato ? salvato === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (scuro) document.documentElement.setAttribute('color-theme', 'dark');
-      // Stagioni: Pasqua (dal lunedì santo a Pasquetta, colori dei ciliegi) e Halloween. Calcolo come in src/stagione.js e
+      // Stagioni: Pasqua (dal lunedì santo a Pasquetta, colori dei ciliegi), Halloween e Natale (8/12 - 6/1). Calcolo come in src/stagione.js e
       // src/ricorrenze.js; in sviluppo segue ?data=
       var oggi = new Date();
       var simulata = '%MODE%' === 'development' && new URLSearchParams(location.search).get('data');
@@ -38,8 +38,11 @@
       var halloween = oggiIntero >= new Date(anno, 9, da) && oggiIntero <= new Date(anno, 9, da + 6);
       if (pasqua) document.documentElement.setAttribute('stagione', 'pasqua');
       if (halloween) document.documentElement.setAttribute('stagione', 'halloween');
+      // Natale: dall'8 dicembre al 6 gennaio compresi (a cavallo d'anno)
+      var natale = (oggi.getMonth() === 11 && oggi.getDate() >= 8) || (oggi.getMonth() === 0 && oggi.getDate() <= 6);
+      if (natale) document.documentElement.setAttribute('stagione', 'natale');
       // Barre del telefono: con una scelta salvata seguono quella e non il sistema
-      var chiaro = halloween ? '#fcf7ee' : pasqua ? '#fcf0f2' : '#fff8ec', buio = halloween ? '#1a1020' : pasqua ? '#24121d' : '#230505';
+      var chiaro = natale ? '#fcf7ee' : halloween ? '#fcf7ee' : pasqua ? '#fcf0f2' : '#fff8ec', buio = natale ? '#10211a' : halloween ? '#1a1020' : pasqua ? '#24121d' : '#230505';
       document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
         var perScuro = salvato ? scuro : meta.media.indexOf('dark') >= 0;
         meta.content = perScuro ? buio : chiaro;

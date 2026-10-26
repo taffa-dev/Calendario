@@ -30,3 +30,11 @@ I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi 
 - Per testare `stagioneDi` in Node serve un `document` finto con `createElement`/`createElementNS` prima dell'import dinamico (`stagione.js` importa `tema.js` e Vue).
 - Pipistrelli: 2 fissi (1 sotto i 600px), non legati a `getNumeroDelGiorno` come in Pills.
 - 26/10/2026: i pipistrelli NON spariscono vicino alle ragnatele (tolta la maschera del provino, su richiesta dell'utente): passano sopra e sotto senza sfumare.
+
+## Natale (26/10/2026)
+- Attivo dall'8/12 al 6/1, a cavallo d'anno, date confrontate a giorno intero (`stagioneDi` e script di `index.html`; test in `test/stagione.test.mjs`). Colori in `tema.css`; effetti in `components/Natale.vue`: neve su canvas, luccichii d'oro solo di giorno, ghirlanda di luci solo di notte. Provino di riferimento: `recupero-stagioni/index.html?s=natale`.
+- `Natale.vue` è a livello pagina (fixed, z-index 1, sotto il foglio a 2 e le icone a 10). L'HTML della ghirlanda è iniettato con `v-html`: lo scoped CSS non lo raggiunge, servono i `:deep(...)`.
+- La neve usa le dimensioni del viewport e distribuisce le celle su tutta la larghezza (nel provino era tutta a sinistra); al cambio tema azzera i fiocchi. Le zone dove sfuma (testo, frecce, angoli) vengono da `.data` e `.frase` del foglio visibile, osservando `.pila`. I luccichii nascono solo fuori da `.data` e `.frase`.
+- Bagliore e ornamento usano la variabile `--ornamento` (oro `#9c7520` di giorno, `#ecdcaa` di notte). `DataDelGiorno.vue` ha due ornamenti, `.luna` (Halloween) e `.stella` (Natale), con la stessa regola `--vuoto`; la stella è più piccola (16u contro 24u).
+- `Natale.vue` usa `window.matchMedia`: non è testabile in Node. Nei test un apostrofo nel titolo (`d'anno`) rompeva la stringa a virgolette singole.
+- Da fare: confronto a occhio col provino su un telefono vero.

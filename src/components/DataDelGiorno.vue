@@ -22,9 +22,12 @@ const anno = props.data.getFullYear();
     </div>
     <div :class="['mese', { 'con-ricorrenze': ricorrenze.length }]">
       <span>{{ mese }}</span>
-      <!-- Ornamento delle stagioni (per ora solo Halloween), al centro della riga: vedi sotto -->
+      <!-- Ornamento delle stagioni (luna a Halloween, stella a Natale), al centro della riga: vedi sotto -->
       <span class="luna" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M15 2a10 10 0 1 0 7 17A8 8 0 0 1 15 2z" /></svg>
+      </span>
+      <span class="stella" aria-hidden="true">
+        <svg viewBox="-12 -12 24 24"><path d="M0-12 2.2-2.2 12 0 2.2 2.2 0 12-2.2 2.2-12 0-2.2-2.2Z" /></svg>
       </span>
       <p v-if="ricorrenze.length" class="ricorrenze">
         <span v-for="nome in ricorrenze" :key="nome">{{ nome }}</span>
@@ -89,19 +92,27 @@ const anno = props.data.getFullYear();
 }
 
 /* Halloween: una luna inclinata al centro della riga, che si interrompe attorno a lei (la riga diventa
-   un filo mascherato, il bordo resta per non spostare nulla). Nelle altre stagioni non c'è */
-.luna {
+   un filo mascherato, il bordo resta per non spostare nulla). A Natale lo stesso con una stella d'oro,
+   un po' più piccola. Nelle altre stagioni non ci sono */
+.luna,
+.stella {
   display: none;
 }
 
-:root[stagione="halloween"] .mese {
+:root[stagione="halloween"] .mese,
+:root[stagione="natale"] .mese {
   position: relative;
-  /* Mezza luna più un respiro di 10 unità (almeno 7px) per lato */
+  /* Mezzo ornamento più un respiro di 10 unità (almeno 7px) per lato */
   --vuoto: calc(max(18px, 24 * var(--u)) / 2 + max(7px, 10 * var(--u)));
   border-bottom-color: transparent;
 }
 
-:root[stagione="halloween"] .mese::after {
+:root[stagione="natale"] .mese {
+  --vuoto: calc(max(11px, 16 * var(--u)) / 2 + max(7px, 10 * var(--u)));
+}
+
+:root[stagione="halloween"] .mese::after,
+:root[stagione="natale"] .mese::after {
   content: "";
   position: absolute;
   left: 0;
@@ -121,6 +132,34 @@ const anno = props.data.getFullYear();
   bottom: 0;
   transform: translate(-50%, calc(50% + 0.5px)) rotate(-25deg);
   line-height: 0;
+}
+
+:root[stagione="natale"] .stella {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, calc(50% + 0.5px));
+  line-height: 0;
+}
+
+.stella svg {
+  display: block;
+  height: max(11px, calc(16 * var(--u)));
+  aspect-ratio: 1;
+  overflow: visible;
+  animation: brilla 4.5s ease-in-out infinite alternate;
+}
+
+.stella path {
+  fill: var(--ornamento);
+  stroke: var(--ornamento);
+  transition: fill var(--cambio-tema), stroke var(--cambio-tema);
+}
+
+@keyframes brilla {
+  from { opacity: 0.75; }
+  to { opacity: 1; }
 }
 
 .luna svg {
@@ -163,7 +202,8 @@ const anno = props.data.getFullYear();
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root[stagione="halloween"][color-theme="dark"] .giorno::after {
+  :root[stagione="halloween"][color-theme="dark"] .giorno::after,
+  .stella svg {
     animation: none;
   }
 }

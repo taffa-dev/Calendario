@@ -58,6 +58,26 @@
   --bordo-foglio: rgb(8 2 14 / 0.3);
 }
 
+/* Natale (src/stagione.js): inchiostro verde abete su carta crema, oro per l'ornamento; di notte
+   verde bosco molto scuro con inchiostri oro e salvia */
+:root[stagione="natale"] {
+  --color-bg: #fcf7ee;
+  --color-1: #418b66;
+  --color-2: #005c31;
+  --color-3: #04341e;
+  --ornamento: #9c7520;
+}
+
+:root[stagione="natale"][color-theme="dark"] {
+  --color-bg: #10211a;
+  --color-1: #e8d8a6;
+  --color-2: #c7a860;
+  --color-3: #a2c3ad;
+  --ornamento: #ecdcaa;
+  --ombra-foglio: rgb(3 12 8 / 0.5);
+  --bordo-foglio: rgb(3 12 8 / 0.3);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --cambio-tema: 0s;

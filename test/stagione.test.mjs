@@ -33,5 +33,15 @@ test('Pasqua invariata, altri giorni senza stagione', () => {
   assert.equal(stagioneDi(giorno(2027, 3, 29)), 'pasqua');
   assert.equal(stagioneDi(giorno(2027, 3, 21)), null);
   assert.equal(stagioneDi(giorno(2027, 3, 30)), null);
-  assert.equal(stagioneDi(giorno(2026, 12, 25)), null);
+  assert.equal(stagioneDi(giorno(2026, 12, 7)), null);
+});
+
+test('Natale: dal 8 dicembre al 6 gennaio compresi, a cavallo d anno', () => {
+  assert.equal(stagioneDi(giorno(2026, 12, 8, 0)), 'natale');
+  assert.equal(stagioneDi(giorno(2026, 12, 25)), 'natale');
+  assert.equal(stagioneDi(giorno(2026, 12, 31, 23)), 'natale');
+  assert.equal(stagioneDi(giorno(2027, 1, 1, 0)), 'natale');
+  assert.equal(stagioneDi(giorno(2027, 1, 6, 23)), 'natale');
+  assert.equal(stagioneDi(giorno(2026, 12, 7, 23)), null);
+  assert.equal(stagioneDi(giorno(2027, 1, 7, 0)), null);
 });
