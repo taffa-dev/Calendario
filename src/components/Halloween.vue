@@ -231,19 +231,9 @@ onBeforeUnmount(() => {
   transition: stroke var(--cambio-tema);
 }
 
-/* Pipistrelli di Pills: volo + su-giù + zigzag con durate diverse, ali interpolate. Di giorno
-   spariscono vicino alle ragnatele */
+/* Pipistrelli di Pills: volo + su-giù + zigzag con durate diverse, ali interpolate. */
 .pipistrelli {
   container-type: size;
-}
-
-:root:not([color-theme="dark"]) .pipistrelli {
-  -webkit-mask: radial-gradient(circle at 100% 0, transparent calc(var(--ragno-alto) * .55), #000 calc(var(--ragno-alto) * .55 + 70px)),
-    radial-gradient(circle at 0 100%, transparent calc(var(--ragno-basso) * .55), #000 calc(var(--ragno-basso) * .55 + 70px));
-  -webkit-mask-composite: source-in;
-  mask: radial-gradient(circle at 100% 0, transparent calc(var(--ragno-alto) * .55), #000 calc(var(--ragno-alto) * .55 + 70px)),
-    radial-gradient(circle at 0 100%, transparent calc(var(--ragno-basso) * .55), #000 calc(var(--ragno-basso) * .55 + 70px));
-  mask-composite: intersect;
 }
 
 .pipistrelli svg {

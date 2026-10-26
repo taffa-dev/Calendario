@@ -29,3 +29,4 @@ I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi 
 - Con `prefers-reduced-motion` alone e ragnatele hanno `animation: none` (non `paused`: restavano a opacità 0 per il fade di ingresso).
 - Per testare `stagioneDi` in Node serve un `document` finto con `createElement`/`createElementNS` prima dell'import dinamico (`stagione.js` importa `tema.js` e Vue).
 - Pipistrelli: 2 fissi (1 sotto i 600px), non legati a `getNumeroDelGiorno` come in Pills.
+- 26/10/2026: i pipistrelli NON spariscono vicino alle ragnatele (tolta la maschera del provino, su richiesta dell'utente): passano sopra e sotto senza sfumare.
