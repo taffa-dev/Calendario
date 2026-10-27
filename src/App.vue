@@ -242,20 +242,13 @@ if ((import.meta.env.DEV && new URLSearchParams(location.search).has('strappo'))
 ricordaGiorno();
 
 // Compleanno sul foglio visto (all'apertura o tornandoci indietro): coriandoli dal basso, a foglio già
-// entrato. Dopo lo strappo del giorno nuovo il foglio entra più tardi. Solo la prima volta: tornando
-// su un compleanno già festeggiato non scoppiano di nuovo
+// entrato. Dopo lo strappo del giorno nuovo il foglio entra più tardi
 const scoppio = ref(0);
 const compleanno = computed(() => ricorrenze.value.some((nome) => /^compleanno/i.test(nome)));
 let attesaScoppio;
-let giaScoppiato = false;
 watch(() => [giornoDi(giornoVisto.value), compleanno.value], ([, festa]) => {
   clearTimeout(attesaScoppio);
-  if (festa && !giaScoppiato) {
-    attesaScoppio = setTimeout(() => {
-      giaScoppiato = true;
-      scoppio.value++;
-    }, strappo.value ? ATTESA_STRAPPO + 1100 : 700);
-  }
+  if (festa) attesaScoppio = setTimeout(() => scoppio.value++, strappo.value ? ATTESA_STRAPPO + 1100 : 700);
 }, { immediate: true });
 onBeforeUnmount(() => clearTimeout(attesaScoppio));
 
