@@ -242,31 +242,20 @@ if ((import.meta.env.DEV && new URLSearchParams(location.search).has('strappo'))
 ricordaGiorno();
 
 // Compleanno sul foglio visto (all'apertura o tornandoci indietro): coriandoli dal basso, a foglio già
-// entrato. Come lo strappo, una volta sola: per ogni giorno di compleanno si ricorda (localStorage) che
-// sono già scoppiati, e partono con calma, il tempo di leggere il giorno. In sviluppo ?coriandoli li
-// rifà a ogni apertura
-const GIA_FESTEGGIATI = 'calendario-coriandoli';
-const LETTURA = 2800;
+// entrato. Dopo lo strappo del giorno nuovo il foglio entra più tardi. Solo la prima volta: tornando
+// su un compleanno già festeggiato non scoppiano di nuovo
 const scoppio = ref(0);
 const compleanno = computed(() => ricorrenze.value.some((nome) => /^compleanno/i.test(nome)));
 let attesaScoppio;
-function giaFesteggiato(giorno) {
-  try { return JSON.parse(localStorage.getItem(GIA_FESTEGGIATI) || '[]').includes(giorno); } catch (e) { return false; }
-}
-function ricordaFesta(giorno) {
-  try {
-    const elenco = JSON.parse(localStorage.getItem(GIA_FESTEGGIATI) || '[]');
-    localStorage.setItem(GIA_FESTEGGIATI, JSON.stringify([...elenco, giorno].slice(-30)));
-  } catch (e) { }
-}
-const sempreCoriandoli = import.meta.env.DEV && new URLSearchParams(location.search).has('coriandoli');
-watch(() => [giornoDi(giornoVisto.value), compleanno.value], ([giorno, festa]) => {
+let giaScoppiato = false;
+watch(() => [giornoDi(giornoVisto.value), compleanno.value], ([, festa]) => {
   clearTimeout(attesaScoppio);
-  if (!festa || (!sempreCoriandoli && giaFesteggiato(giorno))) return;
-  attesaScoppio = setTimeout(() => {
-    ricordaFesta(giorno);
-    scoppio.value++;
-  }, (strappo.value ? ATTESA_STRAPPO + 1100 : 700) + LETTURA);
+  if (festa && !giaScoppiato) {
+    attesaScoppio = setTimeout(() => {
+      giaScoppiato = true;
+      scoppio.value++;
+    }, strappo.value ? ATTESA_STRAPPO + 1100 : 700);
+  }
 }, { immediate: true });
 onBeforeUnmount(() => clearTimeout(attesaScoppio));
 
