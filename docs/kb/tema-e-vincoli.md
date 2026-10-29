@@ -26,6 +26,7 @@ I temi stagionali sono gli stessi di Pills (`../Pills/src/stagioni.js`): stessi 
 - Vue scoped CSS: `:global(sel) .x` butta via `.x` e la regola vale per tutto. Scrivere `:root[stagione="halloween"] .x` senza `:global` (viene scopato solo il selettore più a destra).
 - La riga sotto il mese è il `border-bottom` di `.mese`; in Halloween diventa trasparente e la riga è un `::after` con maschera lineare, interrotta attorno alla luna: l'altezza non cambia e non serve un riquadro con lo sfondo (di notte si vedrebbe sull'alone arancio).
 - Il bagliore del numero è `::after` di `.giorno` con `content: attr(data-g)`: segue il foglio quando si strappa. La grana sta a z-index 3, sopra il foglio (trasparente).
+- 29/10/2026: tornando indietro di notte il bagliore del foglio vecchio (blur 20u) sbucava oltre il bordo della carta del foglio nuovo (inchiostro + 24px). Ora `App.vue` lo nasconde (`display: none`) sul foglio che esce all'indietro (classe `.uscente`) e su quello coperto dal foglio tirato dal dito (`.in-ritorno` sulla `.pila`). Non verificato a occhio: da controllare.
 - Con `prefers-reduced-motion` alone e ragnatele hanno `animation: none` (non `paused`: restavano a opacità 0 per il fade di ingresso).
 - Per testare `stagioneDi` in Node serve un `document` finto con `createElement`/`createElementNS` prima dell'import dinamico (`stagione.js` importa `tema.js` e Vue).
 - Pipistrelli: 2 fissi (1 sotto i 600px), non legati a `getNumeroDelGiorno` come in Pills.

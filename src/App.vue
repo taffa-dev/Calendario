@@ -193,6 +193,7 @@ function esceFoglio(el, fatto) {
       finito();
     };
   } else {
+    el.classList.add('uscente');
     scompare(el, DURATA_RITORNO).onfinish = finito;
   }
   strappoDalDito = null;
@@ -321,7 +322,7 @@ onBeforeUnmount(() => {
   <main class="calendario" @pointerdown="toccoIniziato" @pointermove="toccoMosso" @pointerup="toccoFinito"
     @pointercancel="toccoFinito">
     <!-- I fogli stanno uno sopra l'altro: quello che esce, quello che entra e quello strappato -->
-    <div class="pila">
+    <div :class="['pila', { 'in-ritorno': ritorno }]">
       <div v-if="anteprima" class="foglio" aria-hidden="true">
         <DataDelGiorno :data="anteprima.data" :ricorrenze="anteprima.ricorrenze" />
         <Frase :frase="anteprima.frase" />
@@ -376,6 +377,13 @@ onBeforeUnmount(() => {
 /* I fogli nella stessa cella, centrati: quello che esce non sposta quello che entra */
 .pila {
   display: grid;
+}
+
+/* Il foglio che resta sotto mentre l'altro si riappoggia: il suo bagliore (Halloween, di notte)
+   sfumerebbe oltre il bordo della carta che lo copre */
+.uscente :deep(.giorno)::after,
+.in-ritorno > .foglio:not(.sopra) :deep(.giorno)::after {
+  display: none;
 }
 
 /* Ogni foglio ha la sua carta (src/movimento.js), invisibile finché non si stacca */
