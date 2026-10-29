@@ -448,6 +448,8 @@ onBeforeUnmount(() => {
 .carta {
   position: absolute;
   background-color: var(--color-bg);
+  /* La mostra strappa() solo mentre il foglio è staccato */
+  opacity: 0;
 }
 
 /* Misure gemelle di quelle di Pills: se cambiano qui, vanno cambiate anche là.

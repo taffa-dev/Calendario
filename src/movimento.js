@@ -96,7 +96,10 @@ export function strappa(el, { lato = 1, attesa = 0, durata = DURATA_PASSO, indie
       { transform: `perspective(1400px) translate(${lato * 4}vw, 80vh) rotateX(28deg) rotate(${lato * 16}deg)` }
     ], tempi),
     el.animate({ opacity: [1, 1, 0], offset: [0, 0.75, 1] }, tempi),
-    contenitore.animate({ filter: [appoggiato, sollevato, sollevato], offset: [0, STACCO, 1] }, tempi)
+    contenitore.animate({ filter: [appoggiato, sollevato, sollevato], offset: [0, STACCO, 1] }, tempi),
+    // La carta si vede solo mentre il foglio è staccato: a riposo (ritorno compreso) coprirebbe l'alone
+    // dietro di lei, e di notte a Halloween si vedrebbe come un rettangolo
+    el.querySelector('.carta').animate({ opacity: [0, 1, 1], offset: [0, 0.05, 1] }, tempi)
   ];
 }
 
